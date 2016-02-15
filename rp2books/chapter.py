@@ -44,12 +44,12 @@ class Chapter(object):
 
 	@property
 	def ncx(self):
-		"""Abstraction for the information in the package file; an instance of :py:class:`NAV`."""
+		"""Abstraction for the information in the package file; an instance of :py:class:`NCX`."""
 		return self._ncx
 
 	@property
 	def directory_name(self):
-		"""Abstraction for the information in the package file; an instance of :py:class:`NAV`."""
+		"""Directory name pointing at the chapter."""
 		return self._directory_name
 
 	@property
@@ -74,6 +74,10 @@ class OPF(object):
 	Its expected name and position within the chapter is `package.opf`.
 	"""
 	def __init__(self, directory_name):
+		"""
+		:param directory_name: directory name for the chapter
+		:return:
+		"""
 		# First, parse the package file to get to the content
 		ET.register_namespace('', "http://www.idpf.org/2007/opf")
 		root  = ET.parse(os.path.join(directory_name,"package.opf")).getroot()
@@ -111,12 +115,12 @@ class OPF(object):
 
 	@property
 	def manifest(self):
-		"""The manifest data: an array of ElementTree Element objects"""
+		"""The cloned manifest data: an array of ElementTree Element objects"""
 		return self._manifest
 
 	@property
 	def spine(self):
-		"""The spine data: an array of ElementTree Element objects"""
+		"""The cloned spine data: an array of ElementTree Element objects"""
 		return self._spine
 
 	@staticmethod
@@ -134,6 +138,16 @@ class OPF(object):
 		:return: a list of ElementTree Element objects
 		"""
 		def convert_item(item):
+			"""
+			Clone and convert an item to be included in the cloned list of manifest items by updating the `@href` values
+			(to point at the chapter).
+
+			Navigation and ncx items are filtered out (returning None); those are not used on the book level.
+
+			:param item: old item
+			:type item: ElementTree.Element object
+			:return:
+			"""
 			if item.get("id") == "nav" or item.get("id") == "ncx":
 				return None
 			else:
@@ -141,6 +155,7 @@ class OPF(object):
 				cloned_item.set("href",dir_name + "/" + cloned_item.get("href"))
 				cloned_item.set("id", dir_name.replace("/","-") + "-" + cloned_item.get("id"))
 				return cloned_item
+
 		return filter(lambda i: i is not None, map(convert_item, root.findall(".//{http://www.idpf.org/2007/opf}item")))
 
 	@staticmethod
@@ -157,12 +172,23 @@ class OPF(object):
 		:return: a list of ElementTree Element objects
 		"""
 		def convert_item(item):
+			"""
+			Clone and convert an item to be included in the cloned list of spine items by updating the `@idref` values
+			(to point at the chapter). To be used in a `map` function
+
+			Start items are filtered out (returning None); those are not used on the book level.
+
+			:param item: old item
+			:type item: ElementTree.Element object
+			:return:
+			"""
 			if item.get("idref") == "start":
 				return None
 			else:
 				cloned_item = clone_element(item)
 				cloned_item.set("idref", dir_name.replace("/","-") + "-" + cloned_item.get("idref"))
 				return cloned_item
+
 		return filter(lambda i: i is not None, map(convert_item, root.findall(".//{http://www.idpf.org/2007/opf}itemref")))
 
 	def __repr__(self):
@@ -184,6 +210,10 @@ class Nav(object):
 	Its expected name and position within the chapter is `nav.xhtml`.
 	"""
 	def __init__(self, directory_name):
+		"""
+		:param directory_name: directory name for the chapter
+		:return:
+		"""
 		def change_href(a):
 			a.set("href", directory_name + '/' + a.get('href'))
 		# First, parse the package file to get to the content
@@ -210,7 +240,18 @@ class NCX(object):
 	Its expected name and position within the chapter is `toc.ncx`.
 	"""
 	def __init__(self, directory_name):
+		"""
+		:param directory_name: directory name for the chapter
+		:return:
+		"""
 		def clone_and_change_src(e):
+			"""
+			Convert a TOC item, by cloning and changing the target reference
+
+			:param e: the original element
+			:type e: ElementTree.Element object
+			:return: the cloned and modified element
+			"""
 			cloned_e = clone_element(e)
 			a = cloned_e.find(".//{http://www.daisy.org/z3986/2005/ncx/}content")
 			assert a is not None

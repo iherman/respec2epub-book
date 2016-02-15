@@ -16,12 +16,28 @@ def generate_opf(book_data):
 	:return: Root of the generated package file; and ElementTree Element object
 	"""
 	def add_manifest_item(manifest, id, href, media_type):
+		"""
+		Creation of a new manifest item. (Function to be used in a 'map')
+
+		:param manifest: the whole manifest (parent of the item)
+		:param id: value of @id
+		:param href: value of @href
+		:param media_type: media type
+		"""
 		item = SubElement(manifest, "{http://www.idpf.org/2007/opf}item")
 		item.set("id", id)
 		item.set("href", href)
 		item.set("media-type", media_type)
 
 	def add_metadata_item(opf, path, value, ns="http://purl.org/dc/elements/1.1/"):
+		"""
+		Add a metadata item.
+
+		:param opf: metadata element (parent of the item)
+		:param path: element to add the metadata item to; it may be extended with an attribute value in XPath syntax
+		:param value: value to be set for the metadata
+		:param ns: namespace of used in the path
+		"""
 		item = opf.find((".//{%s}" % ns) + path)
 		assert item is not None
 		item.text = value
@@ -109,6 +125,12 @@ def generate_ncx(book_data):
 	:return: Root of the generated package file; and ElementTree Element object
 	"""
 	def massage_and_add_toc(toc, order):
+		"""
+		Add a toc item to `nav_map`, modifying its play order and its @id value. To be used in a `map` function
+
+		:param toc: the item to be added (and ElementTree Element instance)
+		:param order: play order value
+		"""
 		toc.set("playOrder", "%s" % order)
 		toc.set("id", "nav%s" % order)
 		nav_map.append(toc)
