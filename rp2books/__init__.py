@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import locale
 import json
+from .book import Book
 
 __version__ = "0.5"
 # noinspection PyPep8
@@ -21,4 +22,6 @@ def start(config_file):
 	with open(config_file) as f:
 		config = json.load(f)
 
-	print config
+	book = Book(config)
+	print book
+
