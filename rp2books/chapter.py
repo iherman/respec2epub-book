@@ -3,12 +3,22 @@
 Abstraction for a chapter, i.e., one of the EPUB instances that together constitute the final book.
 """
 import os.path
+# noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
 
 def clone_element(el):
-	return ET.fromstring(ET.tostring(el,encoding="utf-8", method="xml"))
+	"""
+	Clone an element
+
+	:param el: incoming element
+	:type el: ElementTree.Element
+	:return: cloned element
+	:type: ElementTree.Element
+	"""
+	# This is very ugly, I do not know why ElementTree does not have a method for this. Oh well...
+	return ET.fromstring(ET.tostring(el, encoding = "utf-8", method = "xml"))
 
 
 class Chapter(object):
@@ -19,17 +29,18 @@ class Chapter(object):
 	:param directory_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
 	:type directory_name: string
 	"""
+
+	# noinspection PyPep8
 	def __init__(self, directory_name):
 		self._directory_name = directory_name
-		self._opf      = OPF(directory_name)
-		self._nav      = Nav(directory_name)
-		self._ncx      = NCX(directory_name)
-		self._overview = _Overview(os.path.join(directory_name,"Overview.xhtml"))
+		self._opf = OPF(directory_name)
+		self._nav = Nav(directory_name)
+		self._ncx = NCX(directory_name)
+		self._overview = _Overview(os.path.join(directory_name, "Overview.xhtml"))
 
 	def __repr__(self):
 		retval = "Chapter '" + self._directory_name + "':\n "
-		retval += `self.nav`
-		#retval += `self._opf`
+		retval += repr(self.nav)
 		return retval
 
 	@property
@@ -54,17 +65,17 @@ class Chapter(object):
 
 	@property
 	def title(self):
-		"Chapter title"
+		"""Chapter title"""
 		return self.opf.title
 
 	@property
 	def date(self):
-		"Chapter title"
+		"""Chapter title"""
 		return self.opf.date
 
 	@property
 	def creators(self):
-		"Chapter creator"
+		"""Chapter creator"""
 		return self.opf.creators
 
 
@@ -73,6 +84,7 @@ class OPF(object):
 	Abstraction of the package file, providing the run-time information important for processing.
 	Its expected name and position within the chapter is `package.opf`.
 	"""
+
 	def __init__(self, directory_name):
 		"""
 		:param directory_name: directory name for the chapter
@@ -80,7 +92,7 @@ class OPF(object):
 		"""
 		# First, parse the package file to get to the content
 		ET.register_namespace('', "http://www.idpf.org/2007/opf")
-		root  = ET.parse(os.path.join(directory_name,"package.opf")).getroot()
+		root = ET.parse(os.path.join(directory_name, "package.opf")).getroot()
 
 		# First get the simple metadata
 		self._title = root.find(".//{http://purl.org/dc/elements/1.1/}title").text
@@ -90,7 +102,7 @@ class OPF(object):
 		self._date = datetime.strptime(dt, "%Y-%m-%dT%M:%S:00Z")
 
 		creator = root.find(".//{http://purl.org/dc/elements/1.1/}creator").text
-		self._creators = creator.replace(" (editors)", "").replace(" (editor)","") + "; "
+		self._creators = creator.replace(" (editors)", "").replace(" (editor)", "") + "; "
 
 		# Get the manifest entries
 		self._manifest = self._get_manifest(directory_name, root)
@@ -137,6 +149,7 @@ class OPF(object):
 		:type root: ElementTree Element
 		:return: a list of ElementTree Element objects
 		"""
+
 		def convert_item(item):
 			"""
 			Clone and convert an item to be included in the cloned list of manifest items by updating the `@href` values
@@ -152,8 +165,8 @@ class OPF(object):
 				return None
 			else:
 				cloned_item = clone_element(item)
-				cloned_item.set("href",dir_name + "/" + cloned_item.get("href"))
-				cloned_item.set("id", dir_name.replace("/","-") + "-" + cloned_item.get("id"))
+				cloned_item.set("href", dir_name + "/" + cloned_item.get("href"))
+				cloned_item.set("id", dir_name.replace("/", "-") + "-" + cloned_item.get("id"))
 				return cloned_item
 
 		return filter(lambda i: i is not None, map(convert_item, root.findall(".//{http://www.idpf.org/2007/opf}item")))
@@ -171,6 +184,7 @@ class OPF(object):
 		:type root: ElementTree Element
 		:return: a list of ElementTree Element objects
 		"""
+
 		def convert_item(item):
 			"""
 			Clone and convert an item to be included in the cloned list of spine items by updating the `@idref` values
@@ -186,13 +200,13 @@ class OPF(object):
 				return None
 			else:
 				cloned_item = clone_element(item)
-				cloned_item.set("idref", dir_name.replace("/","-") + "-" + cloned_item.get("idref"))
+				cloned_item.set("idref", dir_name.replace("/", "-") + "-" + cloned_item.get("idref"))
 				return cloned_item
 
 		return filter(lambda i: i is not None, map(convert_item, root.findall(".//{http://www.idpf.org/2007/opf}itemref")))
 
 	def __repr__(self):
-		retval  = "        %s\n" % self.title
+		retval = "        %s\n" % self.title
 		retval += "        %s\n" % self.date
 		retval += "        %s\n" % self.creators
 		retval += "        Manifest:\n"
@@ -209,15 +223,23 @@ class Nav(object):
 	Abstraction of the new type navigation (TOC) file, providing the run-time information important for processing.
 	Its expected name and position within the chapter is `nav.xhtml`.
 	"""
+
 	def __init__(self, directory_name):
 		"""
 		:param directory_name: directory name for the chapter
 		:return:
 		"""
+
 		def change_href(a):
+			"""
+			Change the reference for an <a> Element to include the directory name
+
+			:param a: The ElementNote.Element object for an <a>
+			"""
 			a.set("href", directory_name + '/' + a.get('href'))
+
 		# First, parse the package file to get to the content
-		root  = ET.parse(os.path.join(directory_name,"nav.xhtml")).getroot()
+		root = ET.parse(os.path.join(directory_name, "nav.xhtml")).getroot()
 		nav = root.find(".//{http://www.w3.org/1999/xhtml}nav[@id='toc']/{http://www.w3.org/1999/xhtml}ol")
 		assert nav is not None
 		self._nav = clone_element(nav)
@@ -225,11 +247,12 @@ class Nav(object):
 
 	@property
 	def nav(self):
+		"""The navigation root element itself, an ElementTree.Element object"""
 		return self._nav
 
 	def __repr__(self):
 		retval = "...   Nav:"
-		for i in self.nav :
+		for i in self.nav:
 			retval += "        %s\n" % i
 		return retval
 
@@ -239,6 +262,7 @@ class NCX(object):
 	Abstraction of the old type TOC file, providing the run-time information important for processing.
 	Its expected name and position within the chapter is `toc.ncx`.
 	"""
+
 	def __init__(self, directory_name):
 		"""
 		:param directory_name: directory name for the chapter
@@ -246,7 +270,7 @@ class NCX(object):
 		"""
 		def clone_and_change_src(e):
 			"""
-			Convert a TOC item, by cloning and changing the target reference
+			Convert a TOC item, by cloning and changing the target reference.
 
 			:param e: the original element
 			:type e: ElementTree.Element object
@@ -259,12 +283,14 @@ class NCX(object):
 			return cloned_e
 
 		# First, parse the package file to get to the content
-		root  = ET.parse(os.path.join(directory_name,"toc.ncx")).getroot()
+		root = ET.parse(os.path.join(directory_name, "toc.ncx")).getroot()
+
 		# Collect each element, changing the reference on the fly
 		self._toc = map(clone_and_change_src, root.findall(".//{http://www.daisy.org/z3986/2005/ncx/}navPoint"))
 
 	@property
 	def toc(self):
+		"""The TOC root element itself, an ElementTree.Element object"""
 		return self._toc
 
 
@@ -273,5 +299,7 @@ class _Overview(object):
 	Abstraction of the old type TOC file, providing the run-time information important for processing.
 	Its expected name and position within the chapter is `Overview.xhtml`.
 	"""
+
+	# noinspection PyUnusedLocal
 	def __init__(self, file_name):
 		pass

@@ -4,6 +4,7 @@ Generation of the package file
 """
 
 from rp2epub.templates import PACKAGE, NAV, NAV_CSS_NO_NUMBERING, TOC, COVER
+# noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, SubElement
 
@@ -15,30 +16,30 @@ def generate_opf(book_data):
 	:param book_data: a data object collecting the necessary information for the creation of the new package file
 	:return: Root of the generated package file; and ElementTree Element object
 	"""
-	def add_manifest_item(manifest, id, href, media_type):
+	def add_manifest_item(the_manifest, bid, href, media_type):
 		"""
 		Creation of a new manifest item. (Function to be used in a 'map')
 
-		:param manifest: the whole manifest (parent of the item)
-		:param id: value of @id
+		:param the_manifest: the whole manifest (parent of the item)
+		:param bid: value of @id
 		:param href: value of @href
 		:param media_type: media type
 		"""
-		item = SubElement(manifest, "{http://www.idpf.org/2007/opf}item")
-		item.set("id", id)
+		item = SubElement(the_manifest, "{http://www.idpf.org/2007/opf}item")
+		item.set("id", bid)
 		item.set("href", href)
 		item.set("media-type", media_type)
 
-	def add_metadata_item(opf, path, value, ns="http://purl.org/dc/elements/1.1/"):
+	def add_metadata_item(the_opf, path, value, ns="http://purl.org/dc/elements/1.1/"):
 		"""
 		Add a metadata item.
 
-		:param opf: metadata element (parent of the item)
+		:param the_opf: metadata element (parent of the item)
 		:param path: element to add the metadata item to; it may be extended with an attribute value in XPath syntax
 		:param value: value to be set for the metadata
 		:param ns: namespace of used in the path
 		"""
-		item = opf.find((".//{%s}" % ns) + path)
+		item = the_opf.find((".//{%s}" % ns) + path)
 		assert item is not None
 		item.text = value
 
@@ -71,6 +72,7 @@ def generate_opf(book_data):
 	return opf
 
 
+# noinspection PyPep8Naming
 def generate_nav(book_data):
 	"""
 	Generation of a new nav file that combines the information from different chapters.
@@ -107,16 +109,17 @@ def generate_nav(book_data):
 
 	for c in book_data.chapters:
 		cli = SubElement(ol, "{http://www.w3.org/1999/xhtml}li")
-		cli.set("class","tocline")
+		cli.set("class", "tocline")
 		ca = SubElement(cli, "{http://www.w3.org/1999/xhtml}a")
 		ca.set("href", "%s/cover.xhtml" % c.directory_name)
 		ca.text = c.title
-		ca.set("class","tocxref")
+		ca.set("class", "tocxref")
 		cli.append(c.nav.nav)
 
 	return nav
 
 
+# noinspection PyPep8
 def generate_ncx(book_data):
 	"""
 	Generation of a new NCX file that combines the information from different chapters.
@@ -156,15 +159,19 @@ def generate_ncx(book_data):
 	nav_map = ncx.find(".//{http://www.daisy.org/z3986/2005/ncx/}navMap")
 	assert nav_map is not None
 	for c in book_data.chapters:
-		map(massage_and_add_toc, c.ncx.toc, range(play_order, play_order+len(c.ncx.toc)))
+		map(massage_and_add_toc, c.ncx.toc, range(play_order, play_order + len(c.ncx.toc)))
 		play_order += len(c.ncx.toc)
 
 	return ncx
 
 
+# noinspection PyPep8
 def generate_cover(book_data):
 	"""
 	Create a cover page: ``cover.xhtml``.
+
+	:param book_data: a data object collecting the necessary information for the creation of the new package file
+	:return: Root of the generated package file; and ElementTree Element object
 	"""
 	# Setting the default namespace; this is important when the file is generated
 	ET.register_namespace('', "http://www.w3.org/1999/xhtml")

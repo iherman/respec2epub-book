@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Module entry point.
+"""
+
 import locale
 import json
 from .book import Book
@@ -18,10 +22,17 @@ class R2BError(Exception):
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
+
 def start(config_file):
+	"""
+	Debug level for now...
+
+	:param config_file:
+	:return:
+	"""
 	with open(config_file) as f:
 		config = json.load(f)
 
-	book = Book(config)
-	print book
+	the_book = Book(config)
+	print the_book
 
