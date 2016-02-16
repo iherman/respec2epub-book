@@ -3,7 +3,7 @@
 Generation of the package file
 """
 
-from rp2epub.templates import PACKAGE, NAV, NAV_CSS_NO_NUMBERING, TOC
+from rp2epub.templates import PACKAGE, NAV, NAV_CSS_NO_NUMBERING, TOC, COVER
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, SubElement
 
@@ -160,3 +160,42 @@ def generate_ncx(book_data):
 		play_order += len(c.ncx.toc)
 
 	return ncx
+
+
+def generate_cover(book_data):
+	"""
+	Create a cover page: ``cover.xhtml``.
+	"""
+	# Setting the default namespace; this is important when the file is generated
+	ET.register_namespace('', "http://www.w3.org/1999/xhtml")
+	cover = ElementTree(ET.fromstring(COVER))
+
+	# Set the title
+	title      = cover.findall(".//{http://www.w3.org/1999/xhtml}title")[0]
+	title.text = book_data.title
+
+	# Set the authors in the meta
+	editors      = cover.findall(".//{http://www.w3.org/1999/xhtml}meta[@name='author']")[0]
+	editors.set("content", book_data.editors)
+
+	# Set the title in the text
+	title      = cover.findall(".//{http://www.w3.org/1999/xhtml}h1[@id='btitle']")[0]
+	title.text = book_data.title
+
+	# Set the editors
+	editors      = cover.findall(".//{http://www.w3.org/1999/xhtml}p[@id='editors']")[0]
+	editors.text = book_data.editors
+
+	# Set a pointer to the original
+	orig      = cover.findall(".//{http://www.w3.org/1999/xhtml}a[@id='ref_original']")[0]
+	orig.text = "original documents"
+	orig.tag = "span"
+
+	# Set the correct copyright date
+	span      = cover.findall(".//{http://www.w3.org/1999/xhtml}span[@id='cpdate']")[0]
+	span.text = book_data.date.strftime("%Y")
+
+	return cover
+
+
+

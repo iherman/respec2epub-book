@@ -13,11 +13,11 @@ Out of these, the following fields may be extracted:
 
 ## Steps to be taken
 
-* [ ] All folders must be copied under the same folder
-* [ ] Copy one of the `Stylesheet` folders to the top level (essentially, to get the `base.css` file)
-* [ ] Copy one of the `Icons` folders to the top level (to get the logos/icons)
-* [ ] Create (or copy) the META-INF folder with its content
-* [ ] Create (or copy) the mimetype file
+* [x] All folders must be copied under the same folder
+* [x] Copy one of the `Stylesheet` folders to the top level (essentially, to get the `base.css` file)
+* [x] Copy one of the `Icons` folders to the top level (to get the logos/icons)
+* [x] Create (or copy) the META-INF folder with its content
+* [x] Create (or copy) the mimetype file
 * [x] Each chapter should be retrieved and the configuration file completed (see above)
 * [x] Create a `package.opf` file
 	* [x] The metadata part is probably generated from the configuration
@@ -36,20 +36,20 @@ Out of these, the following fields may be extracted:
 		* [x] all the references are modified by adding the directory name on the front
 		* [x] copy the updated cloned element to the current position
 	* [x] Modify the `bodymatter` to include an `Overview` entry for each chapter (with the correct path)
-* [ ] Create the `toc.ncx`
-	* [ ] Meta, `<docTitle>`, and `<docAuthor>` have to use the ID in the configuration files
-	* [ ] Add a local reference to a cover page as a first entry
-	* [ ] List, in order, the entries of the chapters' `toc.ncx` files but
-		* [ ] The references must be updated
-		* [ ] the `navorder` and `id` must be recalculated. Care should be taken to rename the `cover` value as an `id`
-* [ ] Create the cover page
-	* [ ] The title should come from the configuration file
-	* [ ] In contrast to the usual cover, there should be no characterization (Rec, etc) in the template
-	* [ ] The author and date should come from the configuration file
-* [ ] As a cleanup, some files may be removed from the chapters (reduce epubcheck warnings...)
-	* [ ] mimetype
-	* [ ] toc.ncx, nav.xhtml
-	* [ ] META-INF directory
+* [x] Create the `toc.ncx`
+	* [x] Meta, `<docTitle>`, and `<docAuthor>` have to use the ID in the configuration files
+	* [x] Add a local reference to a cover page as a first entry
+	* [x] List, in order, the entries of the chapters' `toc.ncx` files but
+		* [x] The references must be updated
+		* [x] the `navorder` and `id` must be recalculated. Care should be taken to rename the `cover` value as an `id`
+* [x] Create the cover page
+	* [x] The title should come from the configuration file
+	* [x] In contrast to the usual cover, there should be no characterization (Rec, etc) in the template
+	* [x] The author and date should come from the configuration file
+* [x] As a cleanup, some files may be removed from the chapters (reduce epubcheck warnings...)
+	* [x] mimetype
+	* [x] toc.ncx, nav.xhtml
+	* [x] META-INF directory
 * [ ] Zip the content...
 
 ## Optimization, beautification
