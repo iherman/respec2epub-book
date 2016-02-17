@@ -32,14 +32,15 @@ class Chapter(object):
 
 	# noinspection PyPep8
 	def __init__(self, directory_name):
-		self._directory_name = directory_name
-		self._opf = OPF(directory_name)
-		self._nav = Nav(directory_name)
-		self._ncx = NCX(directory_name)
+		self._source = directory_name if directory_name[-1] != '/' else directory_name[:-1]
+		self._target = os.path.basename(self._source)
+		self._opf = OPF(self)
+		self._nav = Nav(self)
+		self._ncx = NCX(self)
 		self._overview = _Overview(os.path.join(directory_name, "Overview.xhtml"))
 
 	def __repr__(self):
-		retval = "Chapter '" + self._directory_name + "':\n "
+		retval = "Chapter '" + self.target + "':\n "
 		retval += repr(self.nav)
 		return retval
 
@@ -59,9 +60,14 @@ class Chapter(object):
 		return self._ncx
 
 	@property
-	def directory_name(self):
+	def source(self):
 		"""Directory name pointing at the chapter."""
-		return self._directory_name
+		return self._source
+
+	@property
+	def target(self):
+		"""Target directory for the copied chapter"""
+		return self._target
 
 	@property
 	def title(self):
@@ -85,14 +91,15 @@ class OPF(object):
 	Its expected name and position within the chapter is `package.opf`.
 	"""
 
-	def __init__(self, directory_name):
+	def __init__(self, chapter):
 		"""
-		:param directory_name: directory name for the chapter
+		:param chapter: the chapter object
+		:type chapter: :py:class:`Chapter`
 		:return:
 		"""
 		# First, parse the package file to get to the content
 		ET.register_namespace('', "http://www.idpf.org/2007/opf")
-		root = ET.parse(os.path.join(directory_name, "package.opf")).getroot()
+		root = ET.parse(os.path.join(chapter.source, "package.opf")).getroot()
 
 		# First get the simple metadata
 		self._title = root.find(".//{http://purl.org/dc/elements/1.1/}title").text
@@ -105,10 +112,10 @@ class OPF(object):
 		self._creators = creator.replace(" (editors)", "").replace(" (editor)", "") + "; "
 
 		# Get the manifest entries
-		self._manifest = self._get_manifest(directory_name, root)
+		self._manifest = self._get_manifest(chapter.target, root)
 
 		# Get the spine
-		self._spine = self._get_spine(directory_name, root)
+		self._spine = self._get_spine(chapter.target, root)
 
 	@property
 	def title(self):
@@ -190,18 +197,13 @@ class OPF(object):
 			Clone and convert an item to be included in the cloned list of spine items by updating the `@idref` values
 			(to point at the chapter). To be used in a `map` function
 
-			Start items are filtered out (returning None); those are not used on the book level.
-
 			:param item: old item
 			:type item: ElementTree.Element object
 			:return:
 			"""
-			if item.get("idref") == "start":
-				return None
-			else:
-				cloned_item = clone_element(item)
-				cloned_item.set("idref", dir_name.replace("/", "-") + "-" + cloned_item.get("idref"))
-				return cloned_item
+			cloned_item = clone_element(item)
+			cloned_item.set("idref", dir_name.replace("/", "-") + "-" + cloned_item.get("idref"))
+			return cloned_item
 
 		return filter(lambda i: i is not None, map(convert_item, root.findall(".//{http://www.idpf.org/2007/opf}itemref")))
 
@@ -224,10 +226,10 @@ class Nav(object):
 	Its expected name and position within the chapter is `nav.xhtml`.
 	"""
 
-	def __init__(self, directory_name):
+	def __init__(self, chapter):
 		"""
-		:param directory_name: directory name for the chapter
-		:return:
+		:param chapter: the chapter object
+		:type chapter: :py:class:`Chapter`
 		"""
 
 		def change_href(a):
@@ -236,10 +238,10 @@ class Nav(object):
 
 			:param a: The ElementNote.Element object for an <a>
 			"""
-			a.set("href", directory_name + '/' + a.get('href'))
+			a.set("href", chapter.target + '/' + a.get('href'))
 
 		# First, parse the package file to get to the content
-		root = ET.parse(os.path.join(directory_name, "nav.xhtml")).getroot()
+		root = ET.parse(os.path.join(chapter.source, "nav.xhtml")).getroot()
 		nav = root.find(".//{http://www.w3.org/1999/xhtml}nav[@id='toc']/{http://www.w3.org/1999/xhtml}ol")
 		assert nav is not None
 		self._nav = clone_element(nav)
@@ -263,10 +265,10 @@ class NCX(object):
 	Its expected name and position within the chapter is `toc.ncx`.
 	"""
 
-	def __init__(self, directory_name):
+	def __init__(self, chapter):
 		"""
-		:param directory_name: directory name for the chapter
-		:return:
+		:param chapter: the chapter object
+		:type chapter: :py:class:`Chapter`
 		"""
 		def clone_and_change_src(e):
 			"""
@@ -279,11 +281,11 @@ class NCX(object):
 			cloned_e = clone_element(e)
 			a = cloned_e.find(".//{http://www.daisy.org/z3986/2005/ncx/}content")
 			assert a is not None
-			a.set("src", directory_name + '/' + a.get('src'))
+			a.set("src", chapter.target + '/' + a.get('src'))
 			return cloned_e
 
 		# First, parse the package file to get to the content
-		root = ET.parse(os.path.join(directory_name, "toc.ncx")).getroot()
+		root = ET.parse(os.path.join(chapter.source, "toc.ncx")).getroot()
 
 		# Collect each element, changing the reference on the fly
 		self._toc = map(clone_and_change_src, root.findall(".//{http://www.daisy.org/z3986/2005/ncx/}navPoint"))

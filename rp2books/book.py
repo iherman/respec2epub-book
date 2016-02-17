@@ -9,7 +9,7 @@ import shutil
 import os
 from StringIO import StringIO
 
-
+import xml.etree.ElementTree as ET
 class Data(object):
 	"""This is just a Python trick: objects of this class behave pretty much like a dictionary, but also using
 	the "." notation; this makes the code look nicer...
@@ -70,7 +70,12 @@ class Book:
 		# Note that the target path is a simple file name, not a full path!
 		to_copy   = ["META-INF/container.xml", "mimetype", "StyleSheets/TR/base.css", "Icons/w3c_main.png"]
 		to_remove = ["mimetype", "nav.xhtml", "package.opf", "toc.ncx"]
-		to_add    = [(self.opf, "package.opf"), (self.nav, "nav.xhtml"), (self.ncx, "toc.ncx"), (self.cover, "cover.xhtml")]
+		to_add    = [
+			(self.opf, "package.opf", "http://www.idpf.org/2007/opf"),
+			(self.nav, "nav.xhtml", "http://www.w3.org/1999/xhtml"),
+			(self.ncx, "toc.ncx", "http://www.daisy.org/z3986/2005/ncx/"),
+			(self.cover, "cover.xhtml", "http://www.w3.org/1999/xhtml")
+		]
 		target    = self._config["target"]
 
 		# The target directory should be emptied and created
@@ -91,9 +96,8 @@ class Book:
 			:type c: :py:class:`chapter.Chapter` object
 			:return:
 			"""
-			c_source = c.directory_name
-			c_target = os.path.join(target, os.path.basename(c.directory_name if c.directory_name[-1] != '/' else c.directory_name[:-1]))
-			shutil.copytree(c_source, c_target)
+			c_target = os.path.join(target, os.path.basename(c.source))
+			shutil.copytree(c.source, c_target)
 
 			# some files should be removed from that target, though
 			shutil.rmtree(os.path.join(c_target, "META-INF"))
@@ -101,7 +105,7 @@ class Book:
 		map(copy_chapter, self.book_data.chapters)
 
 		# Some elements should be copied from one of the chapters into the 'main' part
-		s_chapter = self.book_data.chapters[0].directory_name
+		s_chapter = self.book_data.chapters[0].source
 
 		def copy_item(tc):
 			"""
@@ -119,16 +123,18 @@ class Book:
 			Write an admin file, generated for the chapter, into the the final directory (serializing the content)
 
 			:param f: admin file like nav, package, etc
-			:type f: ElementTree.Element object
+			:type f: tuple consisting of an ElementTree object, a filename, and a namespace URL (for default namespace)
 			"""
 			# Add the generated files
-			f_element, f_name = f
+			f_element_tree, f_name, f_namespace = f
+			ET.register_namespace('', f_namespace)
 			content = StringIO()
-			f_element.write(content, encoding="utf-8", xml_declaration=True, method="xml")
+			f_element_tree.write(content, encoding="utf-8", xml_declaration=True,  method="xml")
 			with open(os.path.join(target, f_name), "w") as f_file:
 				f_file.write(content.getvalue())
 			content.close()
 		map(write_admin_file, to_add)
+		# default_namespace = f_namespace,
 
 	def __repr__(self):
 		retval = "%s" % self._config["title"]

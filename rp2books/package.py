@@ -16,7 +16,7 @@ def generate_opf(book_data):
 	:param book_data: a data object collecting the necessary information for the creation of the new package file
 	:return: Root of the generated package file; and ElementTree Element object
 	"""
-	def add_manifest_item(the_manifest, bid, href, media_type):
+	def add_manifest_item(the_manifest, bid, href, media_type, properties=None):
 		"""
 		Creation of a new manifest item. (Function to be used in a 'map')
 
@@ -29,6 +29,8 @@ def generate_opf(book_data):
 		item.set("id", bid)
 		item.set("href", href)
 		item.set("media-type", media_type)
+		if properties is not None:
+			item.set("properties", properties)
 
 	def add_metadata_item(the_opf, path, value, ns="http://purl.org/dc/elements/1.1/"):
 		"""
@@ -58,7 +60,7 @@ def generate_opf(book_data):
 	manifest = opf.find(".//{http://www.idpf.org/2007/opf}manifest")
 
 	# Add the static entries
-	add_manifest_item(manifest, "nav", "nav.xhtml", "application/xhtml+xml")
+	add_manifest_item(manifest, "nav", "nav.xhtml", "application/xhtml+xml", properties="nav")
 	add_manifest_item(manifest, "start", "cover.xhtml", "application/xhtml+xml")
 	add_manifest_item(manifest, "ncx", "toc.ncx", "application/x-dtbncx+xml")
 
@@ -98,6 +100,7 @@ def generate_nav(book_data):
 
 	ol = SubElement(navMap, "{http://www.w3.org/1999/xhtml}ol")
 	li = SubElement(ol, "{http://www.w3.org/1999/xhtml}li")
+	li.set("class", "tocline")
 	a = SubElement(li, "{http://www.w3.org/1999/xhtml}a")
 	a.set("href", "cover.xhtml")
 	a.text = "Cover"
@@ -111,7 +114,7 @@ def generate_nav(book_data):
 		cli = SubElement(ol, "{http://www.w3.org/1999/xhtml}li")
 		cli.set("class", "tocline")
 		ca = SubElement(cli, "{http://www.w3.org/1999/xhtml}a")
-		ca.set("href", "%s/cover.xhtml" % c.directory_name)
+		ca.set("href", "%s/cover.xhtml" % c.target)
 		ca.text = c.title
 		ca.set("class", "tocxref")
 		cli.append(c.nav.nav)
@@ -132,7 +135,7 @@ def generate_ncx(book_data):
 		Add a toc item to `nav_map`, modifying its play order and its @id value. To be used in a `map` function
 
 		:param toc: the item to be added (and ElementTree Element instance)
-		:param order: play order value
+		:param order: play order value (essentially: index into the array of chapter's toc entries, shifted with the chapter number)
 		"""
 		toc.set("playOrder", "%s" % order)
 		toc.set("id", "nav%s" % order)

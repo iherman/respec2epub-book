@@ -1,15 +1,8 @@
 # Notes on book generation
 
-There is a configuration file that contains
-* Title of overall publication
-* ID for the overall publication
-* For each chapter:
-	* file name for the directory
-	* title of the chapter
+## To Dos
 
-Out of these, the following fields may be extracted:
-
-* Title of each publication
+* [ ] The names should be pushed through a set like operation to avoid multiple apperance of the same names
 
 ## Steps to be taken
 
@@ -53,5 +46,5 @@ Out of these, the following fields may be extracted:
 * [ ] Zip the content...
 
 ## Optimization, beautification
-* Go through each Overview files, and change the URLs to a relative one. This can be done via textual change, using a change set in the configuration file...
-* The toc.ncx could be improved by providing a two level TOC; but may not be worth the trouble
+* [ ] Go through each Overview files, and change the URLs to a relative one. This can be done via textual change, using a change set in the configuration file...
+* [ ] The toc.ncx could be improved by providing a two level TOC; but may not be worth the trouble...
