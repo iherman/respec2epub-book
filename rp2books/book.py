@@ -45,7 +45,16 @@ class Book:
 		self._book_data.title    = config["title"]
 		self._book_data.id       = config["id"]
 		self._book_data.date     = max([c.date for c in self._book_data.chapters])
-		self._book_data.editors  = reduce(lambda x, y: x + y, [c.creators for c in self._book_data.chapters], "").strip()[:-1]
+
+		def intelligent_concat(x,y) :
+			"""Add elements of the second array to the first only if it is not there..."""
+			if len(x) == 0:
+				return filter(lambda c: len(c) != 0, y)
+			else:
+				return x + filter(lambda c: len(c) and c not in x, y)
+		all_editors = reduce(intelligent_concat, [c.creators for c in self._book_data.chapters], [])
+		self._book_data.editors = "; ".join(all_editors).strip()
+
 
 		self.opf   = generate_opf(self._book_data)
 		self.nav   = generate_nav(self._book_data)

@@ -2,9 +2,20 @@
 
 ## To Dos
 
-* [ ] The names should be pushed through a set like operation to avoid multiple apperance of the same names
+## Top level driver part:
 
-## Steps to be taken
+* [ ] All the files are created in a folder
+* [ ] The config file contains a "target", which is the 'short name' of the overall book
+* Depending on whether the unpacked version is also required or not, the target for the unpacked version is either the local directory (named with 'short name') or a temporary (and unique) subdirectory thereof
+* The first step is to get each chapter unpacked into the target area (first option wins)
+    * [ ] if a file name is given in the configuration's "source" field and it is a directory, that is copied into the target area; the basename of the source will be the name of the directory within the target
+    * [ ] if a file name is given in the configuration's "source" field, and it is a file, it is considered to be an ebook, will be unpacked with the result put into the target area; the basename without suffix will be the directory name
+    * [ ] if a "url" field is provided, it will be used as a reference to an epub file, and treated like the previous item (this may be for later)
+* [ ] after all processing is done, if a book is required, the the target folder is packed and stored
+* [ ] if the file is not required, the corresponding directory is removed
+
+
+## Steps to be taken for the generation of content
 
 * [x] All folders must be copied under the same folder
 * [x] Copy one of the `Stylesheet` folders to the top level (essentially, to get the `base.css` file)
@@ -43,8 +54,8 @@
 	* [x] mimetype
 	* [x] toc.ncx, nav.xhtml
 	* [x] META-INF directory
-* [ ] Zip the content...
 
-## Optimization, beautification
+
+## Future Optimization, beautification
 * [ ] Go through each Overview files, and change the URLs to a relative one. This can be done via textual change, using a change set in the configuration file...
 * [ ] The toc.ncx could be improved by providing a two level TOC; but may not be worth the trouble...

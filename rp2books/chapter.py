@@ -30,6 +30,7 @@ class Chapter(object):
 	:type directory_name: string
 	"""
 
+	# TODO: the differentiation between source and target may be unncessary after all: a copy of the full directory is created and processed
 	# noinspection PyPep8
 	def __init__(self, directory_name):
 		self._source = directory_name if directory_name[-1] != '/' else directory_name[:-1]
@@ -130,7 +131,7 @@ class OPF(object):
 	@property
 	def creators(self):
 		"""The creators string"""
-		return self._creators
+		return map(lambda x: x.strip(), self._creators.split(';'))
 
 	@property
 	def manifest(self):
