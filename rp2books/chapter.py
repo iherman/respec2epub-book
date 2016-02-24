@@ -41,8 +41,8 @@ class Chapter(object):
 		self._overview = _Overview(os.path.join(directory_name, "Overview.xhtml"))
 
 	def __repr__(self):
-		retval = "Chapter '" + self.target + "':\n "
-		retval += repr(self.nav)
+		retval = "Chapter '" + self.target + "'"
+		# retval += repr(self.nav)
 		return retval
 
 	@property

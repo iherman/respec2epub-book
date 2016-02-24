@@ -23,7 +23,7 @@ class R2BError(Exception):
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
-def start(config_file):
+def start(config_file, package = False, folder = True):
 	"""
 	Debug level for now...
 

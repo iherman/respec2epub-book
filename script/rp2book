@@ -33,8 +33,6 @@ def process():
 	parser.add_argument("config", help="file name of the JSON configuration file")
 	parser.add_argument("-b", "--book", action='store_true', help="Create an EPUB3 package")
 	parser.add_argument("-f", "--folder", action='store_true', help="Create a folder with the book content")
-	parser.add_argument("-t", "--tempfile", action="store_true", help="Create a one-time, temporary name for the EPUB3 file")
-	parser.add_argument("-l", "--logging", action="store_true", help="Log events in the local file 'log'")
 
 	args = parser.parse_args()
 	from rp2book import start

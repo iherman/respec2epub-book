@@ -2,6 +2,8 @@
 
 ## To Dos
 
+* [ ] check if a chapter is repeated (possible config error...)
+
 ## Top level driver part:
 
 * [ ] All the files are created in a folder
