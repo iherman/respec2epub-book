@@ -38,7 +38,7 @@ def process():
 	from rp2book import start
 	# start(args.config, package=args.book, folder=args.folder, temporary=args.tempfile,
 	# 	  logger= _create_logger("log") if args.logging else None)
-	start(args.config)
+	start(args.config, package=args.book, folder=args.folder)
 
 if __name__ == '__main__':
 	process()

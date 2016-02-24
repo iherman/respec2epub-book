@@ -33,6 +33,6 @@ def start(config_file, package = False, folder = True):
 	with open(config_file) as f:
 		config = json.load(f)
 
-	the_book = Book(config)
+	the_book = Book(config, package, folder)
 	print the_book
 

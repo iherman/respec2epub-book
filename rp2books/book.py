@@ -200,7 +200,7 @@ class Book:
 	"""
 
 	# noinspection PyPep8
-	def __init__(self, json_config):
+	def __init__(self, json_config, package, folder):
 
 		with Config(json_config) as config:
 			# Extract information for chapters
@@ -231,6 +231,27 @@ class Book:
 
 			self._generate_files(config)
 
+			if package:
+				# We have to get a list of all the files to be compressed
+				files = []
+				container_path = os.path.join("META-INF","container.xml")
+				for (dirpath, dirnames, filenames) in os.walk(config.target):
+					for f in filenames:
+						source = os.path.join(dirpath, f)
+						# Remove the files that must be on top, ie, must be put into the zip file explicitly!
+						if f == "mimetype" or source.endswith(container_path):
+							continue
+						target = source.replace(config.target, "")
+						target = target if target[0] != os.sep else target[len(os.sep):]
+						files.append((source, target))
+				with zipfile.ZipFile(config.target + '.epub', 'w') as the_book:
+					# These two files should be on the top of the zip file, the first without compression
+					the_book.write(os.path.join(config.target, "mimetype"), "mimetype", zipfile.ZIP_STORED)
+					the_book.write(os.path.join(config.target, container_path), container_path)
+					map(lambda (source, target): the_book.write(source, target), files)
+			if not folder:
+				shutil.rmtree(config.target)
+
 		# This is mainly needed for debug...
 		self._config = config
 
@@ -254,7 +275,11 @@ class Book:
 
 		# Lists of various file names with different actions
 		# Files to copy from the first chapter to the top level
-		to_copy   = ["META-INF/container.xml", "mimetype", "StyleSheets/TR/base.css", "Icons/w3c_main.png"]
+		to_copy   = [os.path.join("META-INF","container.xml"),
+					 "mimetype",
+					 os.path.join("StyleSheets","TR","base.css"),
+					 os.path.join("Icons", "w3c_main.png")
+					 ]
 		# Files to remove from each chapter
 		to_remove = ["mimetype", "nav.xhtml", "package.opf", "toc.ncx"]
 		# Files to add to the top level; the values are ElementTree Elements; the third item is the default
@@ -267,7 +292,7 @@ class Book:
 		]
 
 		# The target directory for the book
-		target    = book_data.target
+		target = book_data.target
 
 		# The target directory should be emptied and created
 		try:
