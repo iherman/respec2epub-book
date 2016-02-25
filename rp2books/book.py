@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-The main controller class performing all the steps necessary to process...
+The main controller classes performing all the steps necessary to produce the book
 """
 
 from .chapter import Chapter
 from .package import generate_opf, generate_nav, generate_ncx, generate_cover
+from .overview import convert_overviews
 from rp2epub.utils import HttpSession
 from rp2epub import R2EError
 import sys
@@ -15,9 +16,11 @@ import shutil
 import json
 import os
 from StringIO import StringIO
+# noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 
 
+# noinspection PyBroadException,PyUnusedLocal
 class Config(object):
 	"""
 	"Configuration" class, collecting all necessary information on the book (and its chapters) that are necessary for
@@ -80,14 +83,25 @@ class Config(object):
 
 	An ElementTree Element object, representing the final cover page, filled by the enclosing object at initialization time
 
+	.. :py:attribute: uri_patterns
+
+	Array of ('from','to') pairs of URI-s ('to' is typically a relative URI) to replace URI references in the various Overview files.
+
 	"""
+
+	# noinspection PyPep8
 	def __init__(self, json_config_source):
 		"""
 		:param json_config_source: file name for the json configuration file
 		:type json_config_source: str
 		"""
-		with open(json_config_source) as f:
-			json_config = json.load(f)
+		try:
+			with open(json_config_source) as f:
+				json_config = json.load(f)
+		except:
+			from . import R2BError
+			(ty, value, traceback) = sys.exc_info()
+			raise R2BError("JSON parsing issues in '%s': %s" % (json_config_source, value))
 
 		# Sanity check on the configuration file
 		self._check_config(json_config)
@@ -97,15 +111,16 @@ class Config(object):
 		self.target = json_config["target"]
 
 		# All these must be filled by subsequent calls
-		self.chapters    = []
-		self.sources     = []
-		self.toRemoveDir = ""
-		self.date        = None
-		self.editors     = ""
-		self.opf         = None
-		self.nav         = None
-		self.ncx         = None
-		self.cover       = None
+		self.chapters     = []
+		self.sources      = []
+		self.toRemoveDir  = ""
+		self.date         = None
+		self.editors      = ""
+		self.opf          = None
+		self.nav          = None
+		self.ncx          = None
+		self.cover        = None
+		self.uri_patterns = [] if "uripatterns" not in json_config else [tuple(t) for t in json_config["uripatterns"]]
 
 		self._extract_data(json_config)
 
@@ -134,15 +149,20 @@ class Config(object):
 			:return: real source path, to be used by further processing
 			"""
 			def close_and_raise(error):
+				"""
+				Close the class (ie, remove the temporary directory) and raise an error
+
+				:param error: error message string
+				"""
+				from . import R2BError
 				self.close()
 				raise R2BError(error)
 
-			from . import R2BError
 			if os.path.isdir(source):
 				return source
 			elif os.path.isfile(source):
 				# Need the basename, this will be used as a source directory name
-				dir_name = os.path.join(self.toRemoveDir, os.path.basename(source).rsplit(".",1)[0])
+				dir_name = os.path.join(self.toRemoveDir, os.path.basename(source).rsplit(".", 1)[0])
 				# This directory has to be created
 				os.mkdir(dir_name)
 				try:
@@ -167,10 +187,10 @@ class Config(object):
 						# Place to download the zip file to:
 						downloaded_file = os.path.join(self.toRemoveDir, "http_download_" + path)
 						# Place to unzip the zip file to
-						dir_name = os.path.join(self.toRemoveDir, path.rsplit(".",1)[0])
+						dir_name = os.path.join(self.toRemoveDir, path.rsplit(".", 1)[0])
 
 						# Download the file from HTTP:
-						with open(downloaded_file,'w') as downloaded_book:
+						with open(downloaded_file, 'w') as downloaded_book:
 							downloaded_book.write(session.data.read())
 
 						# Unzip it and store it
@@ -203,7 +223,7 @@ class Config(object):
 		try:
 			shutil.rmtree(self.toRemoveDir)
 		except:
-			# This means there was no such directory in the first place; this exception can be ignored
+			# This means there was no such directory yet; this exception can be ignored
 			pass
 
 	def __enter__(self):
@@ -230,7 +250,7 @@ class Config(object):
 		if "chapters" not in config or len(config["chapters"]) == 0:
 			error.append("No chapters are provided")
 		chapter_sources = []
-		for c in config["chapters"] :
+		for c in config["chapters"]:
 			if c in chapter_sources:
 				error.append("Duplicate chapter (%s)" % c)
 			else:
@@ -248,6 +268,7 @@ class Config(object):
 		retval += "Sources: %s\n" % self.sources
 		retval += "Target: %s\n" % self.target
 		retval += "Directory to be removed: %s\n" % self.toRemoveDir
+		retval += "URI replacement patterns: %s\n" % self.uri_patterns
 		retval += "Chapter objects %s\n" % self.chapters
 		retval += "Overall OPF object %s\n" % self.opf
 		retval += "Overall NAV object %s\n" % self.nav
@@ -273,7 +294,7 @@ class Book:
 			# Some generic metadata
 			config.date = max([c.date for c in config.chapters])
 
-			def intelligent_concat(x, y) :
+			def intelligent_concat(x, y):
 				"""Add elements of the second array to the first only if it is not there already.
 				Using sets was not really an option because sets do not necessary keep the order.
 
@@ -294,6 +315,7 @@ class Book:
 			config.opf   = generate_opf(config)
 
 			self._generate_files(config)
+			convert_overviews(config)
 
 			# Finalizing the output: possibly generate an epub file, and remove the sources
 			if package:

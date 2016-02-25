@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Generation of the package file
+Generation of the top level configuration files (package, tables of contents, cover).
 """
 
 from rp2epub.templates import PACKAGE, NAV, NAV_CSS_NO_NUMBERING, TOC, COVER
+from rp2epub.config import DATE_FORMAT_STRING
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, SubElement
@@ -24,6 +25,7 @@ def generate_opf(book_data):
 		:param bid: value of @id
 		:param href: value of @href
 		:param media_type: media type
+		:param properties: list of possible values to be added to the `properties` attribute
 		"""
 		item = SubElement(the_manifest, "{http://www.idpf.org/2007/opf}item")
 		item.set("id", bid)
@@ -52,8 +54,8 @@ def generate_opf(book_data):
 	# Manifest metadata
 	add_metadata_item(opf, "title", book_data.title)
 	add_metadata_item(opf, "identifier", book_data.id)
-	add_metadata_item(opf, "meta[@property='dcterms:modified']", book_data.date.strftime("%Y-%m-%dT%M:%S:00Z"), ns="http://www.idpf.org/2007/opf")
-	add_metadata_item(opf, "meta[@property='dcterms:date']", book_data.date.strftime("%Y-%m-%dT%M:%S:00Z"), ns="http://www.idpf.org/2007/opf")
+	add_metadata_item(opf, "meta[@property='dcterms:modified']", book_data.date.strftime(DATE_FORMAT_STRING), ns="http://www.idpf.org/2007/opf")
+	add_metadata_item(opf, "meta[@property='dcterms:date']", book_data.date.strftime(DATE_FORMAT_STRING), ns="http://www.idpf.org/2007/opf")
 	add_metadata_item(opf, "creator", book_data.editors)
 
 	# The manifest:
@@ -96,7 +98,7 @@ def generate_nav(book_data):
 
 	# Set the date
 	date = nav.findall(".//{http://www.w3.org/1999/xhtml}meta[@name='date']")[0]
-	date.set("content", book_data.date.strftime("%Y-%m-%dT%M:%S:00Z"))
+	date.set("content", book_data.date.strftime(DATE_FORMAT_STRING))
 
 	ol = SubElement(navMap, "{http://www.w3.org/1999/xhtml}ol")
 	li = SubElement(ol, "{http://www.w3.org/1999/xhtml}li")
@@ -117,7 +119,7 @@ def generate_nav(book_data):
 		ca.set("href", "%s/cover.xhtml" % c.target)
 		ca.text = c.title
 		ca.set("class", "tocxref")
-		cli.append(c.nav.nav)
+		cli.append(c.nav)
 
 	return nav
 
@@ -162,8 +164,8 @@ def generate_ncx(book_data):
 	nav_map = ncx.find(".//{http://www.daisy.org/z3986/2005/ncx/}navMap")
 	assert nav_map is not None
 	for c in book_data.chapters:
-		map(massage_and_add_toc, c.ncx.toc, range(play_order, play_order + len(c.ncx.toc)))
-		play_order += len(c.ncx.toc)
+		map(massage_and_add_toc, c.ncx, range(play_order, play_order + len(c.ncx)))
+		play_order += len(c.ncx)
 
 	return ncx
 

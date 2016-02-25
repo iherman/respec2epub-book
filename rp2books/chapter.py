@@ -23,14 +23,13 @@ def clone_element(el):
 
 class Chapter(object):
 	"""
-	Abstraction for the chapter, providing all the information that is necessary for further processing, as well
-	as making changes on the various files that might be necessary
+	Abstraction for the chapter, providing all the information that is necessary for the creation of 'top level'
+	administration files like tables of content or package files.
 
 	:param directory_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
 	:type directory_name: string
 	"""
 
-	# TODO: the differentiation between source and target may be unncessary after all: a copy of the full directory is created and processed
 	# noinspection PyPep8
 	def __init__(self, directory_name):
 		self._source = directory_name if directory_name[-1] != '/' else directory_name[:-1]
@@ -38,27 +37,26 @@ class Chapter(object):
 		self._opf = OPF(self)
 		self._nav = Nav(self)
 		self._ncx = NCX(self)
-		self._overview = _Overview(os.path.join(directory_name, "Overview.xhtml"))
 
 	def __repr__(self):
-		retval = "Chapter '" + self.target + "'"
+		retval = "Chapter '" + self.target + " at " + self.source + "'"
 		# retval += repr(self.nav)
 		return retval
 
 	@property
 	def opf(self):
-		"""Abstraction for the information in the package file; an instance of :py:class:`OPF`."""
+		"""The root of the navigation, an ElementTree Element object"""
 		return self._opf
 
 	@property
 	def nav(self):
 		"""Abstraction for the information in the package file; an instance of :py:class:`NAV`."""
-		return self._nav
+		return self._nav.nav
 
 	@property
 	def ncx(self):
-		"""Abstraction for the information in the package file; an instance of :py:class:`NCX`."""
-		return self._ncx
+		"""Abstraction for the information in the package file; an array of ElementTree Element objects for the table of content."""
+		return self._ncx.toc
 
 	@property
 	def source(self):
@@ -232,15 +230,6 @@ class Nav(object):
 		:param chapter: the chapter object
 		:type chapter: :py:class:`Chapter`
 		"""
-
-		def change_href(a):
-			"""
-			Change the reference for an <a> Element to include the directory name
-
-			:param a: The ElementNote.Element object for an <a>
-			"""
-			a.set("href", chapter.target + '/' + a.get('href'))
-
 		# First, parse the package file to get to the content
 		root = ET.parse(os.path.join(chapter.source, "nav.xhtml")).getroot()
 		nav = root.find(".//{http://www.w3.org/1999/xhtml}nav[@id='toc']/{http://www.w3.org/1999/xhtml}ol")
@@ -295,16 +284,6 @@ class NCX(object):
 
 	@property
 	def toc(self):
-		"""The TOC root element itself, an ElementTree.Element object"""
+		"""An array of an ElementTree.Element objects"""
 		return self._toc
 
-
-class _Overview(object):
-	"""
-	Abstraction of the old type TOC file, providing the run-time information important for processing.
-	Its expected name and position within the chapter is `Overview.xhtml`.
-	"""
-
-	# noinspection PyUnusedLocal
-	def __init__(self, file_name):
-		pass

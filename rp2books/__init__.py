@@ -6,7 +6,7 @@ Module entry point.
 import locale
 from .book import Book
 
-__version__ = "0.5"
+__version__ = "1.0"
 # noinspection PyPep8
 __author__  = 'Ivan Herman, W3C'
 __contact__ = 'Ivan Herman, ivan@w3.org'
@@ -24,11 +24,12 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def start(config, package = False, folder = True):
 	"""
-	Debug level for now...
+	Just a shorthand for Book. Good to use this because it ensures the proper setting of the locale to en_US,
+	necessary for the proper, W3C specific date format.
 
-	:param config_file:
-	:return:
+	:param config: Reference to the JSON configuration file
+	:param package: flag on whether the packaged version, ie, the "real" ebook should be generated
+	:param folder: flag whether the unpacked folder should be kept
 	"""
-	the_book = Book(config, package, folder)
-	print the_book
+	Book(config, package, folder)
 
