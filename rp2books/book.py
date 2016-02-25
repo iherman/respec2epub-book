@@ -12,6 +12,7 @@ import urlparse
 import tempfile
 import zipfile
 import shutil
+import json
 import os
 from StringIO import StringIO
 import xml.etree.ElementTree as ET
@@ -19,9 +20,75 @@ import xml.etree.ElementTree as ET
 
 class Config(object):
 	"""
-	nami
+	"Configuration" class, collecting all necessary information on the book (and its chapters) that are necessary for
+	further processing. Most of the data collected in the initialization phase by extracting it from the
+	JSON data provided by the user, other data are refreshed/added by the 'enclosing' :py:class:`Book` instance.
+
+	The only "active" part of this class is establishing the chapter sources. If the sources are epub files (either
+	locally or via an HTTP(S) URI), the content is unpacked on the fly into a temporary directory. This means that,
+	as far as the upper layers are concerned, chapter sources can be viewed as directory names on the local file system.
+
+	Before processing further, a sanity check on the configuration file is also performed, raising an exception in case
+	there is a problem.
+
+	.. :py:attribute:: title
+
+	Title of the book
+
+	.. :py:attribute:: id
+
+	Unique ID of the book
+
+	.. :py:attribute:: target
+
+	Target (short) name of the generated EPUB and/or the generated folder
+
+	.. :py:attribute:: sources
+
+	Array of chapter references, referring to folders on the local file system
+
+	.. :py:attribute:: chapters
+
+	Array of :py:class:`.chapter.Chapter` references, filled by the enclosing object at initialization time
+
+	.. :py:attribute:: date
+
+	Date of publication, filled by the enclosing object at initialization time
+
+	.. :py:attribute: toRemoveDir
+
+	Temporary directory storing, possibly, unpacked epub instances for further processing. The directory is removed
+	at closure, see :py:meth:`close`.
+
+	.. :py:attribute: editors
+
+	Collected editors, filled by the enclosing object at initialization time
+
+	.. :py:attribute: opf
+
+	An ElementTree Element object, representing the final OPF file, filled by the enclosing object at initialization time
+
+	.. :py:attribute: nav
+
+	An ElementTree Element object, representing the final NAV file, filled by the enclosing object at initialization time
+
+	.. :py:attribute: ncx
+
+	An ElementTree Element object, representing the final NCX file, filled by the enclosing object at initialization time
+
+	.. :py:attribute: ncx
+
+	An ElementTree Element object, representing the final cover page, filled by the enclosing object at initialization time
+
 	"""
-	def __init__(self, json_config):
+	def __init__(self, json_config_source):
+		"""
+		:param json_config_source: file name for the json configuration file
+		:type json_config_source: str
+		"""
+		with open(json_config_source) as f:
+			json_config = json.load(f)
+
 		# Sanity check on the configuration file
 		self._check_config(json_config)
 
@@ -118,7 +185,7 @@ class Config(object):
 					(ty, value, traceback) = sys.exc_info()
 					close_and_raise("Problem accessing '%s': %s" % (source, value))
 
-		self.sources = [create_source(d["source"]) for d in json_config["chapters"]]
+		self.sources = [create_source(d) for d in json_config["chapters"]]
 
 	def close(self):
 		"""
@@ -164,12 +231,10 @@ class Config(object):
 			error.append("No chapters are provided")
 		chapter_sources = []
 		for c in config["chapters"] :
-			if "source" not in c:
-				error.append("Missing source for chapter")
-			elif c["source"] in chapter_sources:
-				error.append("Duplicate chapter source (%s)" % c["source"])
+			if c in chapter_sources:
+				error.append("Duplicate chapter (%s)" % c)
 			else:
-				chapter_sources.append(c["source"])
+				chapter_sources.append(c)
 		if len(error) != 0:
 			raise R2BError("Error in configuration: " + (";".join(error)))
 		return config
@@ -195,10 +260,9 @@ class Book:
 	"""
 	Top level creator of the the combined book. The main processing is done in the :py:meth:`process` method.
 
-	:param json_config: Book configuration as parsed from the JSON file
-	:type json_config: dictionary
+	:param json_config: file name for the json configuration file
+	:type json_config: str
 	"""
-
 	# noinspection PyPep8
 	def __init__(self, json_config, package, folder):
 

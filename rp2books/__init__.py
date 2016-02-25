@@ -4,7 +4,6 @@ Module entry point.
 """
 
 import locale
-import json
 from .book import Book
 
 __version__ = "0.5"
@@ -23,16 +22,13 @@ class R2BError(Exception):
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 
-def start(config_file, package = False, folder = True):
+def start(config, package = False, folder = True):
 	"""
 	Debug level for now...
 
 	:param config_file:
 	:return:
 	"""
-	with open(config_file) as f:
-		config = json.load(f)
-
 	the_book = Book(config, package, folder)
 	print the_book
 
