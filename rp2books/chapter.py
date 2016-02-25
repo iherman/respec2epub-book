@@ -246,7 +246,9 @@ class Nav(object):
 		nav = root.find(".//{http://www.w3.org/1999/xhtml}nav[@id='toc']/{http://www.w3.org/1999/xhtml}ol")
 		assert nav is not None
 		self._nav = clone_element(nav)
-		map(change_href, self._nav.findall(".//{http://www.w3.org/1999/xhtml}a"))
+		# Change the reference for an <a> Element to include the directory name
+		for a in self._nav.findall(".//{http://www.w3.org/1999/xhtml}a"):
+			a.set("href", chapter.target + '/' + a.get('href'))
 
 	@property
 	def nav(self):

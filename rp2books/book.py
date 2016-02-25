@@ -231,14 +231,15 @@ class Book:
 
 			self._generate_files(config)
 
+			# Finalizing the output: possibly generate an epub file, and remove the sources
 			if package:
-				# We have to get a list of all the files to be compressed
+				# We have to get a list of all the files to be added
 				files = []
 				container_path = os.path.join("META-INF","container.xml")
 				for (dirpath, dirnames, filenames) in os.walk(config.target):
 					for f in filenames:
 						source = os.path.join(dirpath, f)
-						# Remove the files that must be on top, ie, must be put into the zip file explicitly!
+						# Remove the files that must be on top, ie, must be put into the zip file explicitly; see below
 						if f == "mimetype" or source.endswith(container_path):
 							continue
 						target = source.replace(config.target, "")
@@ -246,9 +247,11 @@ class Book:
 						files.append((source, target))
 				with zipfile.ZipFile(config.target + '.epub', 'w') as the_book:
 					# These two files should be on the top of the zip file, the first without compression
+					# (This is part of the epub spec)
 					the_book.write(os.path.join(config.target, "mimetype"), "mimetype", zipfile.ZIP_STORED)
 					the_book.write(os.path.join(config.target, container_path), container_path)
-					map(lambda (source, target): the_book.write(source, target), files)
+					# The rest of the content can just be done as it comes
+					for (source, target) in files: the_book.write(source, target)
 			if not folder:
 				shutil.rmtree(config.target)
 
@@ -302,52 +305,31 @@ class Book:
 		os.makedirs(target)
 
 		# Each chapter, ie, the corresponding book directory, must be copied to the target
-		def copy_chapter(c):
-			"""
-			Copy a full chapter into the target, and then prune it by removing the local admin files.
-
-			:param c: a chapter
-			:type c: :py:class:`chapter.Chapter` object
-			:return:
-			"""
+		for c in book_data.chapters:
 			c_target = os.path.join(target, os.path.basename(c.source))
 			shutil.copytree(c.source, c_target)
 
 			# some files should be removed from that target, though
 			shutil.rmtree(os.path.join(c_target, "META-INF"))
-			map(lambda f: os.remove(os.path.join(c_target, f)), to_remove)
-		map(copy_chapter, book_data.chapters)
+			for f in to_remove: os.remove(os.path.join(c_target, f))
 
 		# Some elements should be copied from one of the chapters into the 'main' part
 		s_chapter = book_data.chapters[0].source
-
-		def copy_item(tc):
-			"""
-			Copy one file, possibly creating the directories on the fly
-
-			:param tc: path name for a file to copy
-			"""
+		for tc in to_copy:
+			# Copy one file, possibly creating the directories on the fly
 			if os.path.dirname(tc) != "":
 				os.makedirs(os.path.join(target, os.path.dirname(tc)))
 			shutil.copyfile(os.path.join(s_chapter, tc), os.path.join(target, tc))
-		map(copy_item, to_copy)
 
-		def write_admin_file(f):
-			"""
-			Write an admin file, generated for the chapter, into the the final directory (serializing the content)
+		# Write the top level admin files, generated from the chapters, into the the final directory (serializing the content on the fly)
+		for (f_element_tree, f_name, f_namespace) in to_add:
 
-			:param f: admin file like nav, package, etc
-			:type f: tuple consisting of an ElementTree object, a filename, and a namespace URL (for default namespace)
-			"""
-			# Add the generated files
-			f_element_tree, f_name, f_namespace = f
 			ET.register_namespace('', f_namespace)
 			content = StringIO()
 			f_element_tree.write(content, encoding="utf-8", xml_declaration=True, method="xml")
 			with open(os.path.join(target, f_name), "w") as f_file:
 				f_file.write(content.getvalue())
 			content.close()
-		map(write_admin_file, to_add)
 
 	def __repr__(self):
 		return repr(self.config)
