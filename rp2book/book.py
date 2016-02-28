@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The main controller classes performing all the steps necessary to produce the book
+The main controller classes, performing all the steps necessary to produce the book.
 """
 
 from .chapter import Chapter
@@ -23,69 +23,44 @@ import xml.etree.ElementTree as ET
 # noinspection PyBroadException,PyUnusedLocal
 class Config(object):
 	"""
-	"Configuration" class, collecting all necessary information on the book (and its chapters) that are necessary for
-	further processing. Most of the data collected in the initialization phase by extracting it from the
-	JSON data provided by the user, other data are refreshed/added by the 'enclosing' :py:class:`Book` instance.
+	“Configuration” class, collecting all necessary information on the book (and its chapters) that are necessary for
+	further processing. Most of the data are collected in the initialization phase by extracting it from the
+	JSON data provided by the user, other data are refreshed/added by the :py:class:`Book` instance making use of
+	this class.
 
-	The only "active" part of this class is establishing the chapter sources. If the sources are epub files (either
+	The only processing part of this class is establishing the chapter sources. If the sources are epub files (either
 	locally or via an HTTP(S) URI), the content is unpacked on the fly into a temporary directory. This means that,
-	as far as the upper layers are concerned, chapter sources can be viewed as directory names on the local file system.
+	as far as the upper layers are concerned, chapter sources are always viewed as directory names on the local file system.
 
 	Before processing further, a sanity check on the configuration file is also performed, raising an exception in case
-	there is a problem.
+	of a problem. The attributes of the class are:
 
-	.. :py:attribute:: title
+	:py:attr:`title`: Title of the book
 
-	Title of the book
+	:py:attr:`id`: Unique ID of the book
 
-	.. :py:attribute:: id
+	:py:attr:`target`: Target name of the generated EPUB and/or the generated folder
 
-	Unique ID of the book
+	:py:attr:`sources`: Array of chapter references, referring to folders on the local file system
 
-	.. :py:attribute:: target
+	:py:attr:`chapters`: Array of :py:class:`.chapter.Chapter` references, filled by the enclosing object at initialization time
 
-	Target (short) name of the generated EPUB and/or the generated folder
+	:py:attr:`date`: Date of publication, filled by the enclosing object at initialization time
 
-	.. :py:attribute:: sources
+	:py:attr:`toRemoveDir`: Temporary directory storing, possibly, unpacked epub instances for further processing. The directory is removed
+	at closure, see :py:meth:`.close`.
 
-	Array of chapter references, referring to folders on the local file system
+	:py:attr:`editors`: Collected editors, filled by the enclosing object at initialization time
 
-	.. :py:attribute:: chapters
+	:py:attr:`opf`: An :py:class:`ElementTree.Element` object, representing the final OPF file, filled by the enclosing object at initialization time
 
-	Array of :py:class:`.chapter.Chapter` references, filled by the enclosing object at initialization time
+	:py:attr:`nav`: An :py:class:`ElementTree.Element` object, representing the final NAV file, filled by the enclosing object at initialization time
 
-	.. :py:attribute:: date
+	:py:attr:`ncx`: An :py:class:`ElementTree.Element` object, representing the final NCX file, filled by the enclosing object at initialization time
 
-	Date of publication, filled by the enclosing object at initialization time
+	:py:attr:`ncx`: An :py:class:`ElementTree.Element` object, representing the final cover page, filled by the enclosing object at initialization time
 
-	.. :py:attribute: toRemoveDir
-
-	Temporary directory storing, possibly, unpacked epub instances for further processing. The directory is removed
-	at closure, see :py:meth:`close`.
-
-	.. :py:attribute: editors
-
-	Collected editors, filled by the enclosing object at initialization time
-
-	.. :py:attribute: opf
-
-	An ElementTree Element object, representing the final OPF file, filled by the enclosing object at initialization time
-
-	.. :py:attribute: nav
-
-	An ElementTree Element object, representing the final NAV file, filled by the enclosing object at initialization time
-
-	.. :py:attribute: ncx
-
-	An ElementTree Element object, representing the final NCX file, filled by the enclosing object at initialization time
-
-	.. :py:attribute: ncx
-
-	An ElementTree Element object, representing the final cover page, filled by the enclosing object at initialization time
-
-	.. :py:attribute: uri_patterns
-
-	Array of ('from','to') pairs of URI-s ('to' is typically a relative URI) to replace URI references in the various Overview files.
+	:py:attr:`uri_patterns`: Array of (`from`,`to`) pairs of URI-s (`to` is typically a relative URI) to replace URI references in the various Overview files.
 
 	"""
 
@@ -93,7 +68,8 @@ class Config(object):
 	def __init__(self, json_config_source):
 		"""
 		:param json_config_source: file name for the json configuration file
-		:type json_config_source: str
+		:type json_config_source: string
+		:raises: :py:exc:`.R2BError`: raised if the JSON parsing leads to problems, if the configuration is incorrect, or if the HTTP(S) access or the unpacking has issues (if applicable)
 		"""
 		try:
 			with open(json_config_source) as f:
@@ -211,9 +187,8 @@ class Config(object):
 		"""
 		Clean up the temporary area.
 
-		Note that the object has a `__enter__` and `__exit__` method, ie, it can be used as a context manager. The
-		`__exit__` calls this method. In other
-		words, the object can be (and should be) used via the
+		Note that the object has `__enter__` and `__exit__` methods (the latter invoking this method), i.e., the object can be used as a context manager.
+		In other words, the object can be (and should be) used via the::
 
 		  with Config(json_file) as config:
 		     ...
@@ -239,7 +214,7 @@ class Config(object):
 		Check the config file. In case of problems an error message is raised in the form of an exception.
 
 		:param config: config file to check
-		:raises: R2BError
+		:raises: :py:exc:`.R2BError`
 		"""
 		from . import R2BError
 		error = []
@@ -279,7 +254,14 @@ class Config(object):
 
 class Book:
 	"""
-	Top level creator of the the combined book. The main processing is done in the :py:meth:`process` method.
+	Top level creator of the the combined book. The following steps are performed:
+
+	1. a :py:class:`.chapter.Chapter` object is created for each chapter, yielding information like individual table of contents, date, authors, etc
+	2. the “top level” configuration information are created (through calls to the :py:func:`.package.generate_opf`,  :py:func:`.package.generate_nav`, :py:func:`.package.generate_cover`, and :py:func:`.package.generate_ncx` functions), yielding a series of :py:class:`ElementTree.Element` objects
+	3. the various files are copied and/or generated into a target directory (in the :py:meth:`_generate_files` method)
+	4. the `Overview.xhtml` files are modified by changing the mutual references (through the :py:func:`.overview.convert_overviews` function)
+	5. the final target is zipped into an `epub` file (if applicable)
+	6. the target directory is removed (if applicable)
 
 	:param json_config: file name for the json configuration file
 	:type json_config: str
@@ -353,10 +335,15 @@ class Book:
 	@staticmethod
 	def _generate_files(book_data):
 		"""
-		Generate the files...
+		Generate all the files. This means
+
+		1. The target folder is created
+		2. Each chapter is copied into the target, though removing the `META-INF` and `mimetype` files
+		3. Style files and logos, needed for the overall cover page, are copied into the top level folder
+		3. The various top level configuration files (OPF, NAV, NCX, and cover) are added to the folder (serializing the corresponding ElementTree.Element objects)
 
 		:param book_data: The book data
-		:type book_data: :py:class:`Config` instance
+		:type book_data: :py:class:`.Config` instance
 		"""
 		# All the file copying business...
 		# The target directory should either be created, if not yet there. If it is there, it should be emptied first

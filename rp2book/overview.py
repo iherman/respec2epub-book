@@ -11,10 +11,11 @@ from StringIO import StringIO
 
 
 # noinspection PyPep8
-def _convert_overview(root, uri_patterns):
+def _replace_references(root, uri_patterns):
 	"""
-	Convert the references within on file
-	:param root: The root of the file; an ElementTree object
+	Convert the references within one file
+
+	:param root: The root of the file; an `ElementTree.ElementTree` object
 	:param uri_patterns: the uri patterns to take care of
 	:type uri_patterns: Array of (from,to) tuples
 	"""
@@ -43,7 +44,7 @@ def _convert_chapter(chapter, config):
 	"""
 	# First, parse the Overview file to get to the content
 	root = ET.parse(os.path.join(chapter.source, "Overview.xhtml"))
-	_convert_overview(root, config.uri_patterns)
+	_replace_references(root, config.uri_patterns)
 	content = StringIO()
 	root.write(content, encoding="utf-8", xml_declaration=True, method="xml")
 	with open(os.path.join(config.target, chapter.target, "Overview.xhtml"), "w") as f_file:
@@ -54,7 +55,7 @@ def _convert_chapter(chapter, config):
 # noinspection PyPep8
 def convert_overviews(config):
 	"""
-	Convert the Overview files by using the (from,to) pairs in the configuration
+	Convert the Overview files by using the (from,to) pairs in the configuration. Wrapper around the :py:func:`_convert_chapter` function.
 
 	:param config: Top level configuration
 	:type config: :py:class:`.book.Config`

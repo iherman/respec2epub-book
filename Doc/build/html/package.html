@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>6. Generation of the EPUB level configurations &mdash; Respec Collection to EPUB</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Respec Collection to EPUB" href="index.html" />
+    <link rel="next" title="7. Transformation of the Overview.xhtml file" href="overview.html" />
+    <link rel="prev" title="5. Representation of a chapter" href="chapter.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>Respec Collection to EPUB</span></a></h1>
+        <h2 class="heading"><span>6. Generation of the EPUB level configurations</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="chapter.html">5. Representation of a chapter</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="overview.html">7. Transformation of the Overview.xhtml file</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="module-rp2book.package">
+<span id="generation-of-the-epub-level-configurations"></span><h1>6. Generation of the EPUB level configurations<a class="headerlink" href="#module-rp2book.package" title="Permalink to this headline">¶</a></h1>
+<p>Generation of the  <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects for the top level configuration data (package, tables of contents, cover).</p>
+<dl class="function">
+<dt id="rp2book.package.generate_cover">
+<code class="descclassname">rp2book.package.</code><code class="descname">generate_cover</code><span class="sig-paren">(</span><em>book_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/package.html#generate_cover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.package.generate_cover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cover page object for <code class="docutils literal"><span class="pre">cover.xhtml</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>book_data</strong> &#8211; a data object collecting the necessary information for the creation of the new package file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Root of the generated package file; an <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rp2book.package.generate_nav">
+<code class="descclassname">rp2book.package.</code><code class="descname">generate_nav</code><span class="sig-paren">(</span><em>book_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/package.html#generate_nav"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.package.generate_nav" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generation of a new NAV object, combining the OPF information from the chapters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>book_data</strong> &#8211; a data object collecting the necessary information for the creation of the new package file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Root of the generated nav.xhtml file; an <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rp2book.package.generate_ncx">
+<code class="descclassname">rp2book.package.</code><code class="descname">generate_ncx</code><span class="sig-paren">(</span><em>book_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/package.html#generate_ncx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.package.generate_ncx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generation of a new NCX object, combining the OPF information from the chapters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>book_data</strong> &#8211; a data object collecting the necessary information for the creation of the new package file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Root of the generated package file; an <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rp2book.package.generate_opf">
+<code class="descclassname">rp2book.package.</code><code class="descname">generate_opf</code><span class="sig-paren">(</span><em>book_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/package.html#generate_opf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.package.generate_opf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generation of a new OPF object, combining the OPF information from the chapters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>book_data</strong> &#8211; a data object collecting the necessary information for the creation of the new package file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Root of the generated package file; and <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="chapter.html">5. Representation of a chapter</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="overview.html">7. Transformation of the Overview.xhtml file</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ivan Herman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

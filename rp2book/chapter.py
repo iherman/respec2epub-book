@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Abstraction for a chapter, i.e., one of the EPUB instances that together constitute the final book.
+Abstraction for one “chapter”, i.e., one of the EPUB instances that together constitute the final book.
 """
 import os.path
 # noinspection PyPep8Naming
@@ -13,17 +13,18 @@ def clone_element(el):
 	Clone an element
 
 	:param el: incoming element
-	:type el: ElementTree.Element
+	:type el: :py:class:`ElementTree.Element`
 	:return: cloned element
-	:type: ElementTree.Element
+	:type: :py:class:`ElementTree.Element`
 	"""
 	# This is very ugly, I do not know why ElementTree does not have a method for this. Oh well...
+	# The element is 'serialized' into a string, and then parsed back again.
 	return ET.fromstring(ET.tostring(el, encoding = "utf-8", method = "xml"))
 
 
 class Chapter(object):
 	"""
-	Abstraction for the chapter, providing all the information that is necessary for the creation of 'top level'
+	Class for a chapter, providing all the information that is necessary for the creation of “top level”
 	administration files like tables of content or package files.
 
 	:param directory_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
@@ -45,17 +46,17 @@ class Chapter(object):
 
 	@property
 	def opf(self):
-		"""The root of the navigation, an ElementTree Element object"""
+		"""The root of the navigation, an :py:class:`ElementTree.Element` object"""
 		return self._opf
 
 	@property
 	def nav(self):
-		"""Abstraction for the information in the package file; an instance of :py:class:`NAV`."""
+		"""Abstraction for the information in the package file; an instance of :py:class:`.NAV`."""
 		return self._nav.nav
 
 	@property
 	def ncx(self):
-		"""Abstraction for the information in the package file; an array of ElementTree Element objects for the table of content."""
+		"""Abstraction for the information in the package file; an array of :py:class:`ElementTree.Element` objects for the table of content."""
 		return self._ncx.toc
 
 	@property
@@ -128,32 +129,32 @@ class OPF(object):
 
 	@property
 	def creators(self):
-		"""The creators string"""
+		"""The creators' string"""
 		return map(lambda x: x.strip(), self._creators.split(';'))
 
 	@property
 	def manifest(self):
-		"""The cloned manifest data: an array of ElementTree Element objects"""
+		"""The cloned manifest data: an array of :py:class:`ElementTree.Element` objects"""
 		return self._manifest
 
 	@property
 	def spine(self):
-		"""The cloned spine data: an array of ElementTree Element objects"""
+		"""The cloned spine data: an array of :py:class:`ElementTree.Element` objects"""
 		return self._spine
 
 	@staticmethod
 	def _get_manifest(dir_name, root):
 		""" Collect the manifest entries, converting them on the fly, namely:
 
-		- change the @href attributes to include the directory name
-		- change the @id attributes to include the directory name (normalized to '-' instead of '/')
+		- change the `@href` attributes to include the directory name
+		- change the `@id` attributes to include the directory name (normalized to '-' instead of '/')
 		- removing entries for navigation
 
 		:param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
 		:type dir_name: string
 		:param root: the Root element of the package file
-		:type root: ElementTree Element
-		:return: a list of ElementTree Element objects
+		:type root: :py:class:`ElementTree.Element`
+		:return: a list of :py:class:`ElementTree.Element` objects
 		"""
 
 		def convert_item(item):
@@ -164,7 +165,7 @@ class OPF(object):
 			Navigation and ncx items are filtered out (returning None); those are not used on the book level.
 
 			:param item: old item
-			:type item: ElementTree.Element object
+			:type item: :py:class:`ElementTree.Element` object
 			:return:
 			"""
 			if item.get("id") == "nav" or item.get("id") == "ncx":
@@ -181,14 +182,14 @@ class OPF(object):
 	def _get_spine(dir_name, root):
 		""" Collect the spine entries, converting them on the fly, namely:
 
-		- change the @idref attributes to include the directory name (normalized to '-' instead of '/')
+		- change the `@idref` attributes to include the directory name (normalized to '-' instead of '/')
 		- removing entries for start
 
 		:param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
 		:type dir_name: string
 		:param root: the Root element of the package file
-		:type root: ElementTree Element
-		:return: a list of ElementTree Element objects
+		:type root: :py:class:`ElementTree.Element`
+		:return: a list of :py:class:`ElementTree.Element` objects
 		"""
 
 		def convert_item(item):
@@ -197,7 +198,7 @@ class OPF(object):
 			(to point at the chapter). To be used in a `map` function
 
 			:param item: old item
-			:type item: ElementTree.Element object
+			:type item: :py:class:`ElementTree.Element` object
 			:return:
 			"""
 			cloned_item = clone_element(item)

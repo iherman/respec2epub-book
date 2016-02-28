@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. Command line tool manual &mdash; Respec Collection to EPUB</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Respec Collection to EPUB" href="index.html" />
+    <link rel="next" title="2. Configuration file" href="config.html" />
+    <link rel="prev" title="Respec Collection to EPUB" href="index.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>Respec Collection to EPUB</span></a></h1>
+        <h2 class="heading"><span>1. Command line tool manual</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">Respec Collection to EPUB</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="config.html">2. Configuration file</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="command-line-tool-manual">
+<h1>1. Command line tool manual<a class="headerlink" href="#command-line-tool-manual" title="Permalink to this headline">¶</a></h1>
+<p>When using the command line tool, the result is an EPUB3 file in the current folder (with the <code class="docutils literal"><span class="pre">.epub</span></code> suffix), and whose name is provided
+by the configuration file. If requested, the folder will also include the unpacked version of the generated EPUB.</p>
+<p>This script that can be invoked from the command as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>usage: rp2book [-h] [-r] [-b] [-f] [-t] config
+
+Generate EPUB3 for a collection of EPUB3 documents, themselves generated from W3C TR documents
+originally in respec format.
+
+positional arguments:
+    config        file name for the JSON configuration file
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -b, --book      Create an EPUB3 package
+  -f, --folder    Create a folder with the book content
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">Respec Collection to EPUB</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="config.html">2. Configuration file</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ivan Herman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

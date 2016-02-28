@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>4. The main controller classes &mdash; Respec Collection to EPUB</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Respec Collection to EPUB" href="index.html" />
+    <link rel="next" title="5. Representation of a chapter" href="chapter.html" />
+    <link rel="prev" title="3. Package entry point" href="rp2book.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>Respec Collection to EPUB</span></a></h1>
+        <h2 class="heading"><span>4. The main controller classes</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="rp2book.html">3. Package entry point</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="chapter.html">5. Representation of a chapter</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="module-rp2book.book">
+<span id="the-main-controller-classes"></span><h1>4. The main controller classes<a class="headerlink" href="#module-rp2book.book" title="Permalink to this headline">¶</a></h1>
+<p>The main controller classes, performing all the steps necessary to produce the book.</p>
+<dl class="class">
+<dt id="rp2book.book.Book">
+<em class="property">class </em><code class="descclassname">rp2book.book.</code><code class="descname">Book</code><span class="sig-paren">(</span><em>json_config</em>, <em>package</em>, <em>folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/book.html#Book"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.book.Book" title="Permalink to this definition">¶</a></dt>
+<dd><p>Top level creator of the the combined book. The following steps are performed:</p>
+<ol class="arabic simple">
+<li>a <a class="reference internal" href="chapter.html#rp2book.chapter.Chapter" title="rp2book.chapter.Chapter"><code class="xref py py-class docutils literal"><span class="pre">chapter.Chapter</span></code></a> object is created for each chapter, yielding information like individual table of contents, date, authors, etc</li>
+<li>the “top level” configuration information are created (through calls to the <a class="reference internal" href="package.html#rp2book.package.generate_opf" title="rp2book.package.generate_opf"><code class="xref py py-func docutils literal"><span class="pre">package.generate_opf()</span></code></a>,  <a class="reference internal" href="package.html#rp2book.package.generate_nav" title="rp2book.package.generate_nav"><code class="xref py py-func docutils literal"><span class="pre">package.generate_nav()</span></code></a>, <a class="reference internal" href="package.html#rp2book.package.generate_cover" title="rp2book.package.generate_cover"><code class="xref py py-func docutils literal"><span class="pre">package.generate_cover()</span></code></a>, and <a class="reference internal" href="package.html#rp2book.package.generate_ncx" title="rp2book.package.generate_ncx"><code class="xref py py-func docutils literal"><span class="pre">package.generate_ncx()</span></code></a> functions), yielding a series of <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects</li>
+<li>the various files are copied and/or generated into a target directory (in the <a class="reference internal" href="#rp2book.book.Book._generate_files" title="rp2book.book.Book._generate_files"><code class="xref py py-meth docutils literal"><span class="pre">_generate_files()</span></code></a> method)</li>
+<li>the <cite>Overview.xhtml</cite> files are modified by changing the mutual references (through the <a class="reference internal" href="overview.html#rp2book.overview.convert_overviews" title="rp2book.overview.convert_overviews"><code class="xref py py-func docutils literal"><span class="pre">overview.convert_overviews()</span></code></a> function)</li>
+<li>the final target is zipped into an <cite>epub</cite> file (if applicable)</li>
+<li>the target directory is removed (if applicable)</li>
+</ol>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_config</strong> (<em>str</em>) &#8211; file name for the json configuration file</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="rp2book.book.Book._generate_files">
+<em class="property">static </em><code class="descname">_generate_files</code><span class="sig-paren">(</span><em>book_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/book.html#Book._generate_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.book.Book._generate_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate all the files. This means</p>
+<ol class="arabic simple">
+<li>The target folder is created</li>
+<li>Each chapter is copied into the target, though removing the <cite>META-INF</cite> and <cite>mimetype</cite> files</li>
+</ol>
+<p>3. Style files and logos, needed for the overall cover page, are copied into the top level folder
+3. The various top level configuration files (OPF, NAV, NCX, and cover) are added to the folder (serializing the corresponding ElementTree.Element objects)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>book_data</strong> (<a class="reference internal" href="#rp2book.book.Config" title="rp2book.book.Config"><code class="xref py py-class docutils literal"><span class="pre">Config</span></code></a> instance) &#8211; The book data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.book.Book.config">
+<code class="descname">config</code><a class="headerlink" href="#rp2book.book.Book.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>The overall book data, collected from the configuration file and the chapters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rp2book.book.Config">
+<em class="property">class </em><code class="descclassname">rp2book.book.</code><code class="descname">Config</code><span class="sig-paren">(</span><em>json_config_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/book.html#Config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.book.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>“Configuration” class, collecting all necessary information on the book (and its chapters) that are necessary for
+further processing. Most of the data are collected in the initialization phase by extracting it from the
+JSON data provided by the user, other data are refreshed/added by the <a class="reference internal" href="#rp2book.book.Book" title="rp2book.book.Book"><code class="xref py py-class docutils literal"><span class="pre">Book</span></code></a> instance making use of
+this class.</p>
+<p>The only processing part of this class is establishing the chapter sources. If the sources are epub files (either
+locally or via an HTTP(S) URI), the content is unpacked on the fly into a temporary directory. This means that,
+as far as the upper layers are concerned, chapter sources are always viewed as directory names on the local file system.</p>
+<p>Before processing further, a sanity check on the configuration file is also performed, raising an exception in case
+of a problem. The attributes of the class are:</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">title</span></code>: Title of the book</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">id</span></code>: Unique ID of the book</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">target</span></code>: Target name of the generated EPUB and/or the generated folder</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">sources</span></code>: Array of chapter references, referring to folders on the local file system</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">chapters</span></code>: Array of <a class="reference internal" href="chapter.html#rp2book.chapter.Chapter" title="rp2book.chapter.Chapter"><code class="xref py py-class docutils literal"><span class="pre">chapter.Chapter</span></code></a> references, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">date</span></code>: Date of publication, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">toRemoveDir</span></code>: Temporary directory storing, possibly, unpacked epub instances for further processing. The directory is removed
+at closure, see <a class="reference internal" href="#rp2book.book.Config.close" title="rp2book.book.Config.close"><code class="xref py py-meth docutils literal"><span class="pre">close()</span></code></a>.</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">editors</span></code>: Collected editors, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">opf</span></code>: An <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object, representing the final OPF file, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">nav</span></code>: An <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object, representing the final NAV file, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">ncx</span></code>: An <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object, representing the final NCX file, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">ncx</span></code>: An <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object, representing the final cover page, filled by the enclosing object at initialization time</p>
+<p><code class="xref py py-attr docutils literal"><span class="pre">uri_patterns</span></code>: Array of (<cite>from</cite>,`to`) pairs of URI-s (<cite>to</cite> is typically a relative URI) to replace URI references in the various Overview files.</p>
+<dl class="staticmethod">
+<dt id="rp2book.book.Config._check_config">
+<em class="property">static </em><code class="descname">_check_config</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/book.html#Config._check_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.book.Config._check_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the config file. In case of problems an error message is raised in the form of an exception.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> &#8211; config file to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="rp2book.html#rp2book.R2BError" title="rp2book.R2BError"><code class="xref py py-exc docutils literal"><span class="pre">R2BError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rp2book.book.Config._extract_data">
+<code class="descname">_extract_data</code><span class="sig-paren">(</span><em>json_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/book.html#Config._extract_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.book.Config._extract_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract books into a temporary directory if the source refers to an EPUB instance rather than a directory.
+The <cite>sources</cite> array in the object will contain, after this processing, the reference to either the original source (in case that
+was a directory) or the temporary directory that contains the unpacked book.</p>
+<p>Processing must end with a call to <a class="reference internal" href="#rp2book.book.Config.close" title="rp2book.book.Config.close"><code class="xref py py-meth docutils literal"><span class="pre">close()</span></code></a> which ensures a proper closure of the temporary
+directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_config</strong> &#8211; the original JSON configuration file with the array of chapter references</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rp2book.book.Config.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/book.html#Config.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rp2book.book.Config.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up the temporary area.</p>
+<p>Note that the object has <cite>__enter__</cite> and <cite>__exit__</cite> methods (the latter invoking this method), i.e., the object can be used as a context manager.
+In other words, the object can be (and should be) used via the:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">Config</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">config</span><span class="p">:</span>
+   <span class="o">...</span>
+</pre></div>
+</div>
+<p>pattern, which ensures that this method will be invoked even if an exception was raised somewhere.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="rp2book.html">3. Package entry point</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="chapter.html">5. Representation of a chapter</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ivan Herman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

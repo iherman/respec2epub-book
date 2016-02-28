@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Generation of the top level configuration files (package, tables of contents, cover).
+Generation of the  :py:class:`ElementTree.Element` objects for the top level configuration data (package, tables of contents, cover).
 """
 
 from rp2epub.templates import PACKAGE, NAV, NAV_CSS_NO_NUMBERING, TOC, COVER
@@ -12,10 +12,10 @@ from xml.etree.ElementTree import ElementTree, SubElement
 
 def generate_opf(book_data):
 	"""
-	Generation of a new OPF file that combines the information from different chapters.
+	Generation of a new OPF object, combining the OPF information from the chapters.
 
 	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated package file; and ElementTree Element object
+	:return: Root of the generated package file; and :py:class:`ElementTree.Element` object
 	"""
 	def add_manifest_item(the_manifest, bid, href, media_type, properties=None):
 		"""
@@ -79,10 +79,10 @@ def generate_opf(book_data):
 # noinspection PyPep8Naming
 def generate_nav(book_data):
 	"""
-	Generation of a new nav file that combines the information from different chapters.
+	Generation of a new NAV object, combining the OPF information from the chapters.
 
 	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated nav.xhtml file; and ElementTree Element object
+	:return: Root of the generated nav.xhtml file; an :py:class:`ElementTree.Element` object
 	"""
 	ET.register_namespace('', "http://www.w3.org/1999/xhtml")
 	ET.register_namespace('epub', "http://www.idpf.org/2007/ops")
@@ -127,10 +127,10 @@ def generate_nav(book_data):
 # noinspection PyPep8
 def generate_ncx(book_data):
 	"""
-	Generation of a new NCX file that combines the information from different chapters.
+	Generation of a new NCX object, combining the OPF information from the chapters.
 
 	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated package file; and ElementTree Element object
+	:return: Root of the generated package file; an :py:class:`ElementTree.Element` object
 	"""
 	def massage_and_add_toc(toc, order):
 		"""
@@ -173,10 +173,10 @@ def generate_ncx(book_data):
 # noinspection PyPep8
 def generate_cover(book_data):
 	"""
-	Create a cover page: ``cover.xhtml``.
+	Create a cover page object for ``cover.xhtml``.
 
 	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated package file; and ElementTree Element object
+	:return: Root of the generated package file; an :py:class:`ElementTree.Element` object
 	"""
 	# Setting the default namespace; this is important when the file is generated
 	ET.register_namespace('', "http://www.w3.org/1999/xhtml")
