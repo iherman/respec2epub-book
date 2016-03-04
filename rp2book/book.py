@@ -13,7 +13,6 @@ import urlparse
 import tempfile
 import zipfile
 import shutil
-import json
 import os
 from StringIO import StringIO
 # noinspection PyPep8Naming
@@ -63,7 +62,6 @@ class Config(object):
 	:py:attr:`uri_patterns`: Array of (`from`,`to`) pairs of URI-s (`to` is typically a relative URI) to replace URI references in the various Overview files.
 
 	"""
-
 	# noinspection PyPep8
 	def __init__(self, json_config_source):
 		"""
@@ -72,12 +70,11 @@ class Config(object):
 		:raises: :py:exc:`.R2BError`: raised if the JSON parsing leads to problems, if the configuration is incorrect, or if the HTTP(S) access or the unpacking has issues (if applicable)
 		"""
 		try:
-			with open(json_config_source) as f:
-				json_config = json.load(f)
+			json_config = self._parse_config(json_config_source)
 		except:
 			from . import R2BError
 			(ty, value, traceback) = sys.exc_info()
-			raise R2BError("JSON parsing issues in '%s': %s" % (json_config_source, value))
+			raise R2BError("Configuration file parsing issues in '%s': %s" % (json_config_source, value))
 
 		# Sanity check on the configuration file
 		self._check_config(json_config)
@@ -233,6 +230,26 @@ class Config(object):
 		if len(error) != 0:
 			raise R2BError("Error in configuration: " + (";".join(error)))
 		return config
+
+	@staticmethod
+	def _parse_config(config_file):
+		"""
+		Parsing the config file, which may either be a JSON file (ie, suffix ".js" or ".json") or a YAML file (ie, suffix ".yaml").
+
+		In fact, the fallback format is also JSON, so if no suffix is matched, that is used.
+
+		:param config_file:
+		:return: parsed config
+		:rtype: dict
+		"""
+		if config_file.endswith(".yaml"):
+			import yaml
+			with open(config_file) as f:
+				return yaml.load(f)
+		else:
+			import json
+			with open(config_file) as f:
+				return json.load(f)
 
 	def __repr__(self):
 		retval = ""

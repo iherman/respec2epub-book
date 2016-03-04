@@ -1,7 +1,8 @@
 Configuration file
 ==================
 
-A JSON file with one object.
+A JSON or YAML file with one object. By default, the format is supposed to be in JSON, except if the file suffix
+is ``.yaml``, in which case YAML is used.
 
 Top level properties:
 ---------------------
@@ -29,7 +30,7 @@ Top level properties:
 Example
 -------
 
-The following example is for the collection of the “CSV on the Web” technology suite, where some of the generated EPUB files are
+The following example is the JSON for the collection of the “CSV on the Web” technology suite, where some of the generated EPUB files are
 stored on a local disc, whereas some are extracted from the Web::
 
  {
@@ -56,5 +57,24 @@ stored on a local disc, whereas some are extracted from the Web::
  }
 
 
+The same configuration in YAML::
 
+ title       : CSV on the Web
+ id          : https://www.w3.org/dpub/ebooks/csvw.epub
+ target      : csvw
+ chapters    :
+     - /User/ivan/W3C/WWW/TR/2016/NOTE-tabular-data-primer-20160225/tabular-data-primer.epub
+     - /User/ivan/W3C/WWW/TR/2015/REC-tabular-data-model-20151217/tabular-data-model.epub
+     - /User/ivan/W3C/WWW/TR/2015/REC-tabular-metadata-20151217/tabular-metadata.epub
+     - /User/ivan/W3C/WWW/TR/2015/REC-csv2json-20151217/csv2json.epub
+     - /User/ivan/W3C/WWW/TR/2015/REC-csv2rdf-20151217/csv2rdf.epub
+     - https://www.w3.org/TR/2016/NOTE-csvw-html-20160225/csvw-html.epub
+     - https://www.w3.org/TR/2016/NOTE-csvw-ucr-20160225/csvw-ucr.epub
+ uripatterns :
+     - [ 'http://www.w3.org/TR/2015/REC-tabular-data-model-20151217/', '../tabular-data-model/' ]
+     - [ 'http://www.w3.org/TR/2015/REC-tabular-metadata-20151217/', '../tabular-metadata/' ]
+     - [ 'http://www.w3.org/TR/2015/REC-csv2json-20151217/', '../csv2json/' ]
+     - [ 'http://www.w3.org/TR/2015/REC-csv2rdf-20151217/', '../csv2rdf/' ]
+     - [ 'http://www.w3.org/TR/2016/NOTE-csvw-html-20160225/', '../csvw-html/' ]
+     - [ 'http://www.w3.org/TR/2016/NOTE-tabular-data-primer-20160225/', '../tabular-data-primer/']
 

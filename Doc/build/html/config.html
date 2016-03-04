@@ -48,7 +48,8 @@
         
   <div class="section" id="configuration-file">
 <h1>2. Configuration file<a class="headerlink" href="#configuration-file" title="Permalink to this headline">¶</a></h1>
-<p>A JSON file with one object.</p>
+<p>A JSON or YAML file with one object. By default, the format is supposed to be in JSON, except if the file suffix
+is <code class="docutils literal"><span class="pre">.yaml</span></code>, in which case YAML is used.</p>
 <div class="section" id="top-level-properties">
 <h2>2.1. Top level properties:<a class="headerlink" href="#top-level-properties" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -74,7 +75,7 @@ among chapters happen within the same book, instead of using absolute references
 </div>
 <div class="section" id="example">
 <h2>2.2. Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
-<p>The following example is for the collection of the “CSV on the Web” technology suite, where some of the generated EPUB files are
+<p>The following example is the JSON for the collection of the “CSV on the Web” technology suite, where some of the generated EPUB files are
 stored on a local disc, whereas some are extracted from the Web:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
     <span class="s">&quot;title&quot;</span>       <span class="p">:</span> <span class="s">&quot;CSV on the Web&quot;</span><span class="p">,</span>
@@ -98,6 +99,27 @@ stored on a local disc, whereas some are extracted from the Web:</p>
                <span class="p">[</span><span class="s">&quot;http://www.w3.org/TR/2016/NOTE-tabular-data-primer-20160225/&quot;</span><span class="p">,</span> <span class="s">&quot;../tabular-data-primer/&quot;</span><span class="p">]</span>
         <span class="p">]</span>
 <span class="p">}</span>
+</pre></div>
+</div>
+<p>The same configuration in YAML:</p>
+<div class="highlight-python"><div class="highlight"><pre>title       : CSV on the Web
+id          : https://www.w3.org/dpub/ebooks/csvw.epub
+target      : csvw
+chapters    :
+    - /User/ivan/W3C/WWW/TR/2016/NOTE-tabular-data-primer-20160225/tabular-data-primer.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-tabular-data-model-20151217/tabular-data-model.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-tabular-metadata-20151217/tabular-metadata.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-csv2json-20151217/csv2json.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-csv2rdf-20151217/csv2rdf.epub
+    - https://www.w3.org/TR/2016/NOTE-csvw-html-20160225/csvw-html.epub
+    - https://www.w3.org/TR/2016/NOTE-csvw-ucr-20160225/csvw-ucr.epub
+uripatterns :
+    - [ &#39;http://www.w3.org/TR/2015/REC-tabular-data-model-20151217/&#39;, &#39;../tabular-data-model/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2015/REC-tabular-metadata-20151217/&#39;, &#39;../tabular-metadata/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2015/REC-csv2json-20151217/&#39;, &#39;../csv2json/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2015/REC-csv2rdf-20151217/&#39;, &#39;../csv2rdf/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2016/NOTE-csvw-html-20160225/&#39;, &#39;../csvw-html/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2016/NOTE-tabular-data-primer-20160225/&#39;, &#39;../tabular-data-primer/&#39;]
 </pre></div>
 </div>
 </div>
