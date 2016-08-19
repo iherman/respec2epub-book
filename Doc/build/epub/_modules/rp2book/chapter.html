@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rp2book.chapter</title>
+    
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> 
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Respec Collection to EPUB</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../rp2book.html" accesskey="U">rp2book</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rp2book.chapter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Abstraction for one “chapter”, i.e., one of the EPUB instances that together constitute the final book.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="c1"># noinspection PyPep8Naming</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">as</span> <span class="nn">ET</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+
+<div class="viewcode-block" id="clone_element"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.clone_element">[docs]</a><span class="k">def</span> <span class="nf">clone_element</span><span class="p">(</span><span class="n">el</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clone an element</span>
+
+<span class="sd">    :param el: incoming element</span>
+<span class="sd">    :type el: :py:class:`ElementTree.Element`</span>
+<span class="sd">    :return: cloned element</span>
+<span class="sd">    :type: :py:class:`ElementTree.Element`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	<span class="c1"># This is very ugly, I do not know why ElementTree does not have a method for this. Oh well...</span>
+	<span class="c1"># The element is &#39;serialized&#39; into a string, and then parsed back again.</span>
+	<span class="k">return</span> <span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="Chapter"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.Chapter">[docs]</a><span class="k">class</span> <span class="nc">Chapter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for a chapter, providing all the information that is necessary for the creation of “top level”</span>
+<span class="sd">    administration files like tables of content or package files.</span>
+
+<span class="sd">    :param directory_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.</span>
+<span class="sd">    :type directory_name: string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+	<span class="c1"># noinspection PyPep8</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="n">directory_name</span> <span class="k">if</span> <span class="n">directory_name</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;/&#39;</span> <span class="k">else</span> <span class="n">directory_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_opf</span> <span class="o">=</span> <span class="n">OPF</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_nav</span> <span class="o">=</span> <span class="n">Nav</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_ncx</span> <span class="o">=</span> <span class="n">NCX</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">retval</span> <span class="o">=</span> <span class="s2">&quot;Chapter &#39;&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">+</span> <span class="s2">&quot; at &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span>
+		<span class="c1"># retval += repr(self.nav)</span>
+		<span class="k">return</span> <span class="n">retval</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">opf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The root of the navigation, an :py:class:`ElementTree.Element` object&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opf</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">nav</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Abstraction for the information in the package file; an instance of :py:class:`.NAV`.&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nav</span><span class="o">.</span><span class="n">nav</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">ncx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Abstraction for the information in the package file; an array of :py:class:`ElementTree.Element` objects for the table of content.&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncx</span><span class="o">.</span><span class="n">toc</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Directory name pointing at the chapter.&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Target directory for the copied chapter&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Chapter title&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opf</span><span class="o">.</span><span class="n">title</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Chapter title&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opf</span><span class="o">.</span><span class="n">date</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">editors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Chapter creators as a list&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opf</span><span class="o">.</span><span class="n">editors</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">authors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Chapter creators as a list&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">opf</span><span class="o">.</span><span class="n">authors</span>
+
+</div>
+<div class="viewcode-block" id="OPF"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.OPF">[docs]</a><span class="k">class</span> <span class="nc">OPF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstraction of the package file, providing the run-time information important for processing.</span>
+<span class="sd">    Its expected name and position within the chapter is `package.opf`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chapter</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param chapter: the chapter object</span>
+<span class="sd">        :type chapter: :py:class:`Chapter`</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+		<span class="c1"># First, parse the package file to get to the content</span>
+		<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
+		<span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chapter</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;package.opf&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+		<span class="c1"># First get the simple metadata</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_title</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://purl.org/dc/elements/1.1/}title&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+
+		<span class="n">dt</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.idpf.org/2007/opf}meta[@property=&#39;dcterms:date&#39;]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+		<span class="c1"># TODO: the format string should be imported from the rp2epub package!</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">T%M:%S:00Z&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_authors</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_editors</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">creator</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://purl.org/dc/elements/1.1/}creator&quot;</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">creator</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;editor&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;author&quot;</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_authors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">creator</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_editors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">creator</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+		<span class="c1"># Get the manifest entries</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_manifest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_manifest</span><span class="p">(</span><span class="n">chapter</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+
+		<span class="c1"># Get the spine</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_spine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spine</span><span class="p">(</span><span class="n">chapter</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The title of the chapter&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_title</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The date of the publication (as a datetime object)&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_date</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">editors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The list of creators&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editors</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">authors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The list of creators&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_authors</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">manifest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The cloned manifest data: an array of :py:class:`ElementTree.Element` objects&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manifest</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">spine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The cloned spine data: an array of :py:class:`ElementTree.Element` objects&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spine</span>
+
+	<span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="OPF._get_manifest"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.OPF._get_manifest">[docs]</a>	<span class="k">def</span> <span class="nf">_get_manifest</span><span class="p">(</span><span class="n">dir_name</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Collect the manifest entries, converting them on the fly, namely:</span>
+
+<span class="sd">        - change the `@href` attributes to include the directory name</span>
+<span class="sd">        - change the `@id` attributes to include the directory name (normalized to &#39;-&#39; instead of &#39;/&#39;)</span>
+<span class="sd">        - removing entries for navigation</span>
+
+<span class="sd">        :param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.</span>
+<span class="sd">        :type dir_name: string</span>
+<span class="sd">        :param root: the Root element of the package file</span>
+<span class="sd">        :type root: :py:class:`ElementTree.Element`</span>
+<span class="sd">        :return: a list of :py:class:`ElementTree.Element` objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+		<span class="k">def</span> <span class="nf">convert_item</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+			<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Clone and convert an item to be included in the cloned list of manifest items by updating the `@href` values</span>
+<span class="sd">            (to point at the chapter).</span>
+
+<span class="sd">            Navigation and ncx items are filtered out (returning None); those are not used on the book level.</span>
+
+<span class="sd">            :param item: old item</span>
+<span class="sd">            :type item: :py:class:`ElementTree.Element` object</span>
+<span class="sd">            :return:</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+			<span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;nav&quot;</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ncx&quot;</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">None</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">cloned_item</span> <span class="o">=</span> <span class="n">clone_element</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+				<span class="n">cloned_item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">cloned_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">))</span>
+				<span class="n">cloned_item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">cloned_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+				<span class="k">return</span> <span class="n">cloned_item</span>
+
+		<span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="n">convert_item</span><span class="p">,</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.idpf.org/2007/opf}item&quot;</span><span class="p">)))</span>
+</div>
+	<span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="OPF._get_spine"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.OPF._get_spine">[docs]</a>	<span class="k">def</span> <span class="nf">_get_spine</span><span class="p">(</span><span class="n">dir_name</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Collect the spine entries, converting them on the fly, namely:</span>
+
+<span class="sd">        - change the `@idref` attributes to include the directory name (normalized to &#39;-&#39; instead of &#39;/&#39;)</span>
+<span class="sd">        - removing entries for start</span>
+
+<span class="sd">        :param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.</span>
+<span class="sd">        :type dir_name: string</span>
+<span class="sd">        :param root: the Root element of the package file</span>
+<span class="sd">        :type root: :py:class:`ElementTree.Element`</span>
+<span class="sd">        :return: a list of :py:class:`ElementTree.Element` objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+		<span class="k">def</span> <span class="nf">convert_item</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+			<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Clone and convert an item to be included in the cloned list of spine items by updating the `@idref` values</span>
+<span class="sd">            (to point at the chapter). To be used in a `map` function</span>
+
+<span class="sd">            :param item: old item</span>
+<span class="sd">            :type item: :py:class:`ElementTree.Element` object</span>
+<span class="sd">            :return:</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+			<span class="n">cloned_item</span> <span class="o">=</span> <span class="n">clone_element</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+			<span class="n">cloned_item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;idref&quot;</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">cloned_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;idref&quot;</span><span class="p">))</span>
+			<span class="k">return</span> <span class="n">cloned_item</span>
+
+		<span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="n">convert_item</span><span class="p">,</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.idpf.org/2007/opf}itemref&quot;</span><span class="p">)))</span>
+</div>
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">retval</span> <span class="o">=</span>  <span class="s2">&quot;        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
+		<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span>
+		<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        Editors: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">editors</span>
+		<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        Authors: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">authors</span>
+		<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        Manifest:</span><span class="se">\n</span><span class="s2">&quot;</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="p">:</span>
+			<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        -- </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        Spine:</span><span class="se">\n</span><span class="s2">&quot;</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spine</span><span class="p">:</span>
+			<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        -- </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">retval</span>
+
+</div>
+<div class="viewcode-block" id="Nav"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.Nav">[docs]</a><span class="k">class</span> <span class="nc">Nav</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstraction of the new type navigation (TOC) file, providing the run-time information important for processing.</span>
+<span class="sd">    Its expected name and position within the chapter is `nav.xhtml`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chapter</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param chapter: the chapter object</span>
+<span class="sd">        :type chapter: :py:class:`Chapter`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+		<span class="c1"># First, parse the package file to get to the content</span>
+		<span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chapter</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;nav.xhtml&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+		<span class="n">nav</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}nav[@id=&#39;toc&#39;]/{http://www.w3.org/1999/xhtml}ol&quot;</span><span class="p">)</span>
+		<span class="k">assert</span> <span class="n">nav</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_nav</span> <span class="o">=</span> <span class="n">clone_element</span><span class="p">(</span><span class="n">nav</span><span class="p">)</span>
+		<span class="c1"># Change the reference for an &lt;a&gt; Element to include the directory name</span>
+		<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}a&quot;</span><span class="p">):</span>
+			<span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="n">chapter</span><span class="o">.</span><span class="n">target</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">))</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">nav</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;The navigation root element itself, an ElementTree.Element object&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nav</span>
+
+	<span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">retval</span> <span class="o">=</span> <span class="s2">&quot;...   Nav:&quot;</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nav</span><span class="p">:</span>
+			<span class="n">retval</span> <span class="o">+=</span> <span class="s2">&quot;        </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span>
+		<span class="k">return</span> <span class="n">retval</span>
+
+</div>
+<div class="viewcode-block" id="NCX"><a class="viewcode-back" href="../../chapter.html#rp2book.chapter.NCX">[docs]</a><span class="k">class</span> <span class="nc">NCX</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstraction of the old type TOC file, providing the run-time information important for processing.</span>
+<span class="sd">    Its expected name and position within the chapter is `toc.ncx`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chapter</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param chapter: the chapter object</span>
+<span class="sd">        :type chapter: :py:class:`Chapter`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+		<span class="k">def</span> <span class="nf">clone_and_change_src</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+			<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Convert a TOC item, by cloning and changing the target reference.</span>
+
+<span class="sd">            :param e: the original element</span>
+<span class="sd">            :type e: ElementTree.Element object</span>
+<span class="sd">            :return: the cloned and modified element</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+			<span class="n">cloned_e</span> <span class="o">=</span> <span class="n">clone_element</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+			<span class="n">a</span> <span class="o">=</span> <span class="n">cloned_e</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}content&quot;</span><span class="p">)</span>
+			<span class="k">assert</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+			<span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;src&quot;</span><span class="p">,</span> <span class="n">chapter</span><span class="o">.</span><span class="n">target</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;src&#39;</span><span class="p">))</span>
+			<span class="k">return</span> <span class="n">cloned_e</span>
+
+		<span class="c1"># First, parse the package file to get to the content</span>
+		<span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chapter</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;toc.ncx&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+		<span class="c1"># Collect each element, changing the reference on the fly</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_toc</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">clone_and_change_src</span><span class="p">,</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}navPoint&quot;</span><span class="p">))</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">toc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;An array of an ElementTree.Element objects&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_toc</span>
+</pre></div></div>
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ivan Herman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

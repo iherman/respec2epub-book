@@ -5,6 +5,7 @@ Generation of the  :py:class:`ElementTree.Element` objects for the top level con
 
 from rp2epub.templates import PACKAGE, NAV, NAV_CSS_NO_NUMBERING, TOC, COVER
 from rp2epub.config import DATE_FORMAT_STRING
+from rp2epub.utils import Utils
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ElementTree, SubElement
@@ -12,21 +13,21 @@ from xml.etree.ElementTree import ElementTree, SubElement
 
 def generate_opf(book_data):
 	"""
-	Generation of a new OPF object, combining the OPF information from the chapters.
+    Generation of a new OPF object, combining the OPF information from the chapters.
 
-	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated package file; and :py:class:`ElementTree.Element` object
-	"""
+    :param book_data: a data object collecting the necessary information for the creation of the new package file
+    :return: Root of the generated package file; and :py:class:`ElementTree.Element` object
+    """
 	def add_manifest_item(the_manifest, bid, href, media_type, properties=None):
 		"""
-		Creation of a new manifest item. (Function to be used in a 'map')
+        Creation of a new manifest item. (Function to be used in a 'map')
 
-		:param the_manifest: the whole manifest (parent of the item)
-		:param bid: value of @id
-		:param href: value of @href
-		:param media_type: media type
-		:param properties: list of possible values to be added to the `properties` attribute
-		"""
+        :param the_manifest: the whole manifest (parent of the item)
+        :param bid: value of @id
+        :param href: value of @href
+        :param media_type: media type
+        :param properties: list of possible values to be added to the `properties` attribute
+        """
 		item = SubElement(the_manifest, "{http://www.idpf.org/2007/opf}item")
 		item.set("id", bid)
 		item.set("href", href)
@@ -36,13 +37,13 @@ def generate_opf(book_data):
 
 	def add_metadata_item(the_opf, path, value, ns="http://purl.org/dc/elements/1.1/"):
 		"""
-		Add a metadata item.
+        Add a metadata item.
 
-		:param the_opf: metadata element (parent of the item)
-		:param path: element to add the metadata item to; it may be extended with an attribute value in XPath syntax
-		:param value: value to be set for the metadata
-		:param ns: namespace of used in the path
-		"""
+        :param the_opf: metadata element (parent of the item)
+        :param path: element to add the metadata item to; it may be extended with an attribute value in XPath syntax
+        :param value: value to be set for the metadata
+        :param ns: namespace of used in the path
+        """
 		item = the_opf.find((".//{%s}" % ns) + path)
 		assert item is not None
 		item.text = value
@@ -50,16 +51,25 @@ def generate_opf(book_data):
 	# Parse the raw manifest file
 	ET.register_namespace('', "http://www.idpf.org/2007/opf")
 	opf = ElementTree(ET.fromstring(PACKAGE))
+	# The manifest:
+	manifest = opf.find(".//{http://www.idpf.org/2007/opf}manifest")
+	metadata = opf.findall(".//{http://www.idpf.org/2007/opf}metadata")[0]
 
 	# Manifest metadata
 	add_metadata_item(opf, "title", book_data.title)
 	add_metadata_item(opf, "identifier", book_data.id)
 	add_metadata_item(opf, "meta[@property='dcterms:modified']", book_data.date.strftime(DATE_FORMAT_STRING), ns="http://www.idpf.org/2007/opf")
 	add_metadata_item(opf, "meta[@property='dcterms:date']", book_data.date.strftime(DATE_FORMAT_STRING), ns="http://www.idpf.org/2007/opf")
-	add_metadata_item(opf, "creator", book_data.editors)
-
-	# The manifest:
-	manifest = opf.find(".//{http://www.idpf.org/2007/opf}manifest")
+	for editor in book_data.editors :
+		creator = SubElement(metadata, "{http://purl.org/dc/elements/1.1/}creator")
+		creator.set("role", "editor")
+		creator.text = editor
+		creator.tail = "\n    "
+	for author in book_data.authors :
+		creator = SubElement(metadata, "{http://purl.org/dc/elements/1.1/}creator")
+		creator.set("role", "author")
+		creator.text = author
+		creator.tail = "\n    "
 
 	# Add the static entries
 	add_manifest_item(manifest, "nav", "nav.xhtml", "application/xhtml+xml", properties="nav")
@@ -79,11 +89,11 @@ def generate_opf(book_data):
 # noinspection PyPep8Naming
 def generate_nav(book_data):
 	"""
-	Generation of a new NAV object, combining the OPF information from the chapters.
+    Generation of a new NAV object, combining the OPF information from the chapters.
 
-	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated nav.xhtml file; an :py:class:`ElementTree.Element` object
-	"""
+    :param book_data: a data object collecting the necessary information for the creation of the new package file
+    :return: Root of the generated nav.xhtml file; an :py:class:`ElementTree.Element` object
+    """
 	ET.register_namespace('', "http://www.w3.org/1999/xhtml")
 	ET.register_namespace('epub', "http://www.idpf.org/2007/ops")
 	nav = ElementTree(ET.fromstring(NAV % NAV_CSS_NO_NUMBERING))
@@ -127,18 +137,18 @@ def generate_nav(book_data):
 # noinspection PyPep8
 def generate_ncx(book_data):
 	"""
-	Generation of a new NCX object, combining the OPF information from the chapters.
+    Generation of a new NCX object, combining the OPF information from the chapters.
 
-	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated package file; an :py:class:`ElementTree.Element` object
-	"""
+    :param book_data: a data object collecting the necessary information for the creation of the new package file
+    :return: Root of the generated package file; an :py:class:`ElementTree.Element` object
+    """
 	def massage_and_add_toc(toc, order):
 		"""
-		Add a toc item to `nav_map`, modifying its play order and its @id value. To be used in a `map` function
+        Add a toc item to `nav_map`, modifying its play order and its @id value. To be used in a `map` function
 
-		:param toc: the item to be added (and ElementTree Element instance)
-		:param order: play order value (essentially: index into the array of chapter's toc entries, shifted with the chapter number)
-		"""
+        :param toc: the item to be added (and ElementTree Element instance)
+        :param order: play order value (essentially: index into the array of chapter's toc entries, shifted with the chapter number)
+        """
 		toc.set("playOrder", "%s" % order)
 		toc.set("id", "nav%s" % order)
 		nav_map.append(toc)
@@ -154,7 +164,7 @@ def generate_ncx(book_data):
 	# Set the authors
 	authors    = ncx.findall(".//{http://www.daisy.org/z3986/2005/ncx/}docAuthor")[0]
 	txt        = SubElement(authors, "{http://www.daisy.org/z3986/2005/ncx/}text")
-	txt.text   = book_data.editors
+	txt.text   = Utils.editors_to_string(book_data.editors)
 
 	# Set the book ID
 	meta_id = ncx.findall(".//{http://www.daisy.org/z3986/2005/ncx/}meta[@name='dtb:uid']")[0]
@@ -173,11 +183,11 @@ def generate_ncx(book_data):
 # noinspection PyPep8
 def generate_cover(book_data):
 	"""
-	Create a cover page object for ``cover.xhtml``.
+    Create a cover page object for ``cover.xhtml``.
 
-	:param book_data: a data object collecting the necessary information for the creation of the new package file
-	:return: Root of the generated package file; an :py:class:`ElementTree.Element` object
-	"""
+    :param book_data: a data object collecting the necessary information for the creation of the new package file
+    :return: Root of the generated package file; an :py:class:`ElementTree.Element` object
+    """
 	# Setting the default namespace; this is important when the file is generated
 	ET.register_namespace('', "http://www.w3.org/1999/xhtml")
 	cover = ElementTree(ET.fromstring(COVER))
@@ -187,8 +197,8 @@ def generate_cover(book_data):
 	title.text = book_data.title
 
 	# Set the authors in the meta
-	editors      = cover.findall(".//{http://www.w3.org/1999/xhtml}meta[@name='author']")[0]
-	editors.set("content", book_data.editors)
+	editors = cover.findall(".//{http://www.w3.org/1999/xhtml}meta[@name='author']")[0]
+	editors.set("content", Utils.editors_to_string(book_data.editors))
 
 	# Set the title in the text
 	title      = cover.findall(".//{http://www.w3.org/1999/xhtml}h1[@id='btitle']")[0]
@@ -197,6 +207,15 @@ def generate_cover(book_data):
 	# Set the editors
 	editors      = cover.findall(".//{http://www.w3.org/1999/xhtml}p[@id='editors']")[0]
 	editors.text = book_data.editors
+
+	if len(book_data.editors) != 0 :
+		editors = cover.findall(".//{http://www.w3.org/1999/xhtml}p[@id='editors']")[0]
+		editors.text = Utils.editors_to_string(book_data.editors)
+
+	# Set the authors
+	if len(book_data.authors) != 0 :
+		authors = cover.findall(".//{http://www.w3.org/1999/xhtml}p[@id='authors']")[0]
+		authors.text = Utils.editors_to_string(book_data.authors, editor=False)
 
 	# Set a pointer to the original
 	orig      = cover.findall(".//{http://www.w3.org/1999/xhtml}a[@id='ref_original']")[0]

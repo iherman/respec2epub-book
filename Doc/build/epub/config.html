@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. Configuration file</title>
+    
+    <link rel="stylesheet" href="_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rp2book.html" title="3. Package entry point"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="manual.html" title="1. Command line tool manual"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Respec Collection to EPUB</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configuration-file">
+<h1>2. Configuration file</h1>
+<p>A JSON or YAML file with one object. By default, the format is supposed to be in JSON, except if the file suffix
+is <code class="docutils literal"><span class="pre">.yaml</span></code>, in which case YAML is used.</p>
+<div class="section" id="top-level-properties">
+<h2>2.1. Top level properties:</h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">title</span></code> (required): Title of the whole book. Required</li>
+<li><code class="docutils literal"><span class="pre">id</span></code> (required): (Unique) ID of the book, to be added to the package file.
+Required</li>
+<li><code class="docutils literal"><span class="pre">target</span></code> (required): Target (relative to the current directory). The target will be used to create
+the final, unpacked directory (if required) and (using the <code class="docutils literal"><span class="pre">.epub</span></code> suffix) the EPUB file, if required.</li>
+<li><code class="docutils literal"><span class="pre">chapters</span></code> (required): Array of chapter references (in order). The reference can be<ul>
+<li>a directory name: the content is an unzipped version of
+the generated EPUB (the content is <em>copied</em> to the target)</li>
+<li>a local EPUB file (with an <code class="docutils literal"><span class="pre">.epub</span></code>
+extension), the content of which is unzipped into a local, temporary file (and removed after processing)</li>
+<li>a URL to a remote EPUB file (with an <code class="docutils literal"><span class="pre">.epub</span></code>
+extension), the content of which is downloaded and unzipped into a local, temporary file (and removed after processing)</li>
+</ul>
+</li>
+<li><code class="docutils literal"><span class="pre">uripatterns</span></code> (optional): Array of tuples (represented as two-element arrays in JSON) of “from” and “to” pairs. The
+“from” is an absolute URL (typically a dated URL in the W3C TR space), and “to” is the corresponding relative URL
+to be used as a reference to another chapter within the same generated book. The goal is to ensure that cross references
+among chapters happen within the same book, instead of using absolute references.</li>
+</ul>
+</div>
+<div class="section" id="example">
+<h2>2.2. Example</h2>
+<p>The following example is the JSON for the collection of the “CSV on the Web” technology suite, where some of the generated EPUB files are
+stored on a local disc, whereas some are extracted from the Web:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;title&quot;</span>       <span class="p">:</span> <span class="s2">&quot;CSV on the Web&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span>          <span class="p">:</span> <span class="s2">&quot;https://www.w3.org/dpub/ebooks/csvw.epub&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span>      <span class="p">:</span> <span class="s2">&quot;csvw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;chapters&quot;</span>    <span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;/User/ivan/W3C/WWW/TR/2016/NOTE-tabular-data-primer-20160225/tabular-data-primer.epub&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;/User/ivan/W3C/WWW/TR/2015/REC-tabular-data-model-20151217/tabular-data-model.epub&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;/User/ivan/W3C/WWW/TR/2015/REC-tabular-metadata-20151217/tabular-metadata.epub&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;/User/ivan/W3C/WWW/TR/2015/REC-csv2json-20151217/csv2json.epub&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;/User/ivan/W3C/WWW/TR/2015/REC-csv2rdf-20151217/csv2rdf.epub&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;https://www.w3.org/TR/2016/NOTE-csvw-html-20160225/csvw-html.epub&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;https://www.w3.org/TR/2016/NOTE-csvw-ucr-20160225/csvw-ucr.epub&quot;</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;uripatterns&quot;</span> <span class="p">:</span> <span class="p">[</span>
+               <span class="p">[</span><span class="s2">&quot;http://www.w3.org/TR/2015/REC-tabular-data-model-20151217/&quot;</span><span class="p">,</span> <span class="s2">&quot;../tabular-data-model/&quot;</span><span class="p">],</span>
+               <span class="p">[</span><span class="s2">&quot;http://www.w3.org/TR/2015/REC-tabular-metadata-20151217/&quot;</span><span class="p">,</span> <span class="s2">&quot;../tabular-metadata/&quot;</span><span class="p">],</span>
+               <span class="p">[</span><span class="s2">&quot;http://www.w3.org/TR/2015/REC-csv2json-20151217/&quot;</span><span class="p">,</span> <span class="s2">&quot;../csv2json/&quot;</span><span class="p">],</span>
+               <span class="p">[</span><span class="s2">&quot;http://www.w3.org/TR/2015/REC-csv2rdf-20151217/&quot;</span><span class="p">,</span> <span class="s2">&quot;../csv2rdf/&quot;</span><span class="p">],</span>
+               <span class="p">[</span><span class="s2">&quot;http://www.w3.org/TR/2016/NOTE-csvw-html-20160225/&quot;</span><span class="p">,</span> <span class="s2">&quot;../csvw-html/&quot;</span><span class="p">],</span>
+               <span class="p">[</span><span class="s2">&quot;http://www.w3.org/TR/2016/NOTE-tabular-data-primer-20160225/&quot;</span><span class="p">,</span> <span class="s2">&quot;../tabular-data-primer/&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The same configuration in YAML:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>title       : CSV on the Web
+id          : https://www.w3.org/dpub/ebooks/csvw.epub
+target      : csvw
+chapters    :
+    - /User/ivan/W3C/WWW/TR/2016/NOTE-tabular-data-primer-20160225/tabular-data-primer.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-tabular-data-model-20151217/tabular-data-model.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-tabular-metadata-20151217/tabular-metadata.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-csv2json-20151217/csv2json.epub
+    - /User/ivan/W3C/WWW/TR/2015/REC-csv2rdf-20151217/csv2rdf.epub
+    - https://www.w3.org/TR/2016/NOTE-csvw-html-20160225/csvw-html.epub
+    - https://www.w3.org/TR/2016/NOTE-csvw-ucr-20160225/csvw-ucr.epub
+uripatterns :
+    - [ &#39;http://www.w3.org/TR/2015/REC-tabular-data-model-20151217/&#39;, &#39;../tabular-data-model/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2015/REC-tabular-metadata-20151217/&#39;, &#39;../tabular-metadata/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2015/REC-csv2json-20151217/&#39;, &#39;../csv2json/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2015/REC-csv2rdf-20151217/&#39;, &#39;../csv2rdf/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2016/NOTE-csvw-html-20160225/&#39;, &#39;../csvw-html/&#39; ]
+    - [ &#39;http://www.w3.org/TR/2016/NOTE-tabular-data-primer-20160225/&#39;, &#39;../tabular-data-primer/&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ivan Herman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

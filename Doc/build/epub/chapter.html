@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>5. Representation of a chapter</title>
+    
+    <link rel="stylesheet" href="_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
+  </head>
+  <body role="document">
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="package.html" title="6. Generation of the EPUB level configurations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="book.html" title="4. The main controller classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Respec Collection to EPUB</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rp2book.chapter">
+<span id="representation-of-a-chapter"></span><h1>5. Representation of a chapter</h1>
+<p>Abstraction for one “chapter”, i.e., one of the EPUB instances that together constitute the final book.</p>
+<dl class="class">
+<dt id="rp2book.chapter.Chapter">
+<em class="property">class </em><code class="descclassname">rp2book.chapter.</code><code class="descname">Chapter</code><span class="sig-paren">(</span><em>directory_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#Chapter"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Class for a chapter, providing all the information that is necessary for the creation of “top level”
+administration files like tables of content or package files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directory_name</strong> (<em>string</em>) &#8211; the directory in the file system containing the chapter. All information will be extracted with this as a base.</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.authors">
+<code class="descname">authors</code></dt>
+<dd><p>Chapter creators as a list</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.date">
+<code class="descname">date</code></dt>
+<dd><p>Chapter title</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.editors">
+<code class="descname">editors</code></dt>
+<dd><p>Chapter creators as a list</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.nav">
+<code class="descname">nav</code></dt>
+<dd><p>Abstraction for the information in the package file; an instance of <code class="xref py py-class docutils literal"><span class="pre">NAV</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.ncx">
+<code class="descname">ncx</code></dt>
+<dd><p>Abstraction for the information in the package file; an array of <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects for the table of content.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.opf">
+<code class="descname">opf</code></dt>
+<dd><p>The root of the navigation, an <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.source">
+<code class="descname">source</code></dt>
+<dd><p>Directory name pointing at the chapter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.target">
+<code class="descname">target</code></dt>
+<dd><p>Target directory for the copied chapter</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.Chapter.title">
+<code class="descname">title</code></dt>
+<dd><p>Chapter title</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rp2book.chapter.NCX">
+<em class="property">class </em><code class="descclassname">rp2book.chapter.</code><code class="descname">NCX</code><span class="sig-paren">(</span><em>chapter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#NCX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Abstraction of the old type TOC file, providing the run-time information important for processing.
+Its expected name and position within the chapter is <cite>toc.ncx</cite>.</p>
+<dl class="attribute">
+<dt id="rp2book.chapter.NCX.toc">
+<code class="descname">toc</code></dt>
+<dd><p>An array of an ElementTree.Element objects</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rp2book.chapter.Nav">
+<em class="property">class </em><code class="descclassname">rp2book.chapter.</code><code class="descname">Nav</code><span class="sig-paren">(</span><em>chapter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#Nav"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Abstraction of the new type navigation (TOC) file, providing the run-time information important for processing.
+Its expected name and position within the chapter is <cite>nav.xhtml</cite>.</p>
+<dl class="attribute">
+<dt id="rp2book.chapter.Nav.nav">
+<code class="descname">nav</code></dt>
+<dd><p>The navigation root element itself, an ElementTree.Element object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rp2book.chapter.OPF">
+<em class="property">class </em><code class="descclassname">rp2book.chapter.</code><code class="descname">OPF</code><span class="sig-paren">(</span><em>chapter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#OPF"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Abstraction of the package file, providing the run-time information important for processing.
+Its expected name and position within the chapter is <cite>package.opf</cite>.</p>
+<dl class="staticmethod">
+<dt id="rp2book.chapter.OPF._get_manifest">
+<em class="property">static </em><code class="descname">_get_manifest</code><span class="sig-paren">(</span><em>dir_name</em>, <em>root</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#OPF._get_manifest"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Collect the manifest entries, converting them on the fly, namely:</p>
+<ul class="simple">
+<li>change the <cite>&#64;href</cite> attributes to include the directory name</li>
+<li>change the <cite>&#64;id</cite> attributes to include the directory name (normalized to &#8216;-&#8216; instead of &#8216;/&#8217;)</li>
+<li>removing entries for navigation</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir_name</strong> (<em>string</em>) &#8211; the directory in the file system containing the chapter. All information will be extracted with this as a base.</li>
+<li><strong>root</strong> (<code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code>) &#8211; the Root element of the package file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rp2book.chapter.OPF._get_spine">
+<em class="property">static </em><code class="descname">_get_spine</code><span class="sig-paren">(</span><em>dir_name</em>, <em>root</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#OPF._get_spine"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Collect the spine entries, converting them on the fly, namely:</p>
+<ul class="simple">
+<li>change the <cite>&#64;idref</cite> attributes to include the directory name (normalized to &#8216;-&#8216; instead of &#8216;/&#8217;)</li>
+<li>removing entries for start</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir_name</strong> (<em>string</em>) &#8211; the directory in the file system containing the chapter. All information will be extracted with this as a base.</li>
+<li><strong>root</strong> (<code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code>) &#8211; the Root element of the package file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.OPF.authors">
+<code class="descname">authors</code></dt>
+<dd><p>The list of creators</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.OPF.date">
+<code class="descname">date</code></dt>
+<dd><p>The date of the publication (as a datetime object)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.OPF.editors">
+<code class="descname">editors</code></dt>
+<dd><p>The list of creators</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.OPF.manifest">
+<code class="descname">manifest</code></dt>
+<dd><p>The cloned manifest data: an array of <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.OPF.spine">
+<code class="descname">spine</code></dt>
+<dd><p>The cloned spine data: an array of <code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code> objects</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rp2book.chapter.OPF.title">
+<code class="descname">title</code></dt>
+<dd><p>The title of the chapter</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="rp2book.chapter.clone_element">
+<code class="descclassname">rp2book.chapter.</code><code class="descname">clone_element</code><span class="sig-paren">(</span><em>el</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rp2book/chapter.html#clone_element"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Clone an element</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>el</strong> (<code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code>) &#8211; incoming element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">cloned element</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">ElementTree.Element</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ivan Herman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

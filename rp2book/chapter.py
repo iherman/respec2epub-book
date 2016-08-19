@@ -10,13 +10,13 @@ from datetime import datetime
 
 def clone_element(el):
 	"""
-	Clone an element
+    Clone an element
 
-	:param el: incoming element
-	:type el: :py:class:`ElementTree.Element`
-	:return: cloned element
-	:type: :py:class:`ElementTree.Element`
-	"""
+    :param el: incoming element
+    :type el: :py:class:`ElementTree.Element`
+    :return: cloned element
+    :type: :py:class:`ElementTree.Element`
+    """
 	# This is very ugly, I do not know why ElementTree does not have a method for this. Oh well...
 	# The element is 'serialized' into a string, and then parsed back again.
 	return ET.fromstring(ET.tostring(el, encoding = "utf-8", method = "xml"))
@@ -24,12 +24,12 @@ def clone_element(el):
 
 class Chapter(object):
 	"""
-	Class for a chapter, providing all the information that is necessary for the creation of “top level”
-	administration files like tables of content or package files.
+    Class for a chapter, providing all the information that is necessary for the creation of “top level”
+    administration files like tables of content or package files.
 
-	:param directory_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
-	:type directory_name: string
-	"""
+    :param directory_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
+    :type directory_name: string
+    """
 
 	# noinspection PyPep8
 	def __init__(self, directory_name):
@@ -80,23 +80,28 @@ class Chapter(object):
 		return self.opf.date
 
 	@property
-	def creators(self):
-		"""Chapter creator"""
-		return self.opf.creators
+	def editors(self):
+		"""Chapter creators as a list"""
+		return self.opf.editors
+
+	@property
+	def authors(self) :
+		"""Chapter creators as a list"""
+		return self.opf.authors
 
 
 class OPF(object):
 	"""
-	Abstraction of the package file, providing the run-time information important for processing.
-	Its expected name and position within the chapter is `package.opf`.
-	"""
+    Abstraction of the package file, providing the run-time information important for processing.
+    Its expected name and position within the chapter is `package.opf`.
+    """
 
 	def __init__(self, chapter):
 		"""
-		:param chapter: the chapter object
-		:type chapter: :py:class:`Chapter`
-		:return:
-		"""
+        :param chapter: the chapter object
+        :type chapter: :py:class:`Chapter`
+        :return:
+        """
 		# First, parse the package file to get to the content
 		ET.register_namespace('', "http://www.idpf.org/2007/opf")
 		root = ET.parse(os.path.join(chapter.source, "package.opf")).getroot()
@@ -108,8 +113,13 @@ class OPF(object):
 		# TODO: the format string should be imported from the rp2epub package!
 		self._date = datetime.strptime(dt, "%Y-%m-%dT%M:%S:00Z")
 
-		creator = root.find(".//{http://purl.org/dc/elements/1.1/}creator").text
-		self._creators = creator.replace(" (editors)", "").replace(" (editor)", "") + "; "
+		self._authors = []
+		self._editors = []
+		for creator in root.findall(".//{http://purl.org/dc/elements/1.1/}creator"):
+			if creator.get("role", default="editor") == "author":
+				self._authors.append(creator.text)
+			else:
+				self._editors.append(creator.text)
 
 		# Get the manifest entries
 		self._manifest = self._get_manifest(chapter.target, root)
@@ -128,9 +138,14 @@ class OPF(object):
 		return self._date
 
 	@property
-	def creators(self):
-		"""The creators' string"""
-		return map(lambda x: x.strip(), self._creators.split(';'))
+	def editors(self):
+		"""The list of creators"""
+		return self._editors
+
+	@property
+	def authors(self):
+		"""The list of creators"""
+		return self._authors
 
 	@property
 	def manifest(self):
@@ -146,28 +161,28 @@ class OPF(object):
 	def _get_manifest(dir_name, root):
 		""" Collect the manifest entries, converting them on the fly, namely:
 
-		- change the `@href` attributes to include the directory name
-		- change the `@id` attributes to include the directory name (normalized to '-' instead of '/')
-		- removing entries for navigation
+        - change the `@href` attributes to include the directory name
+        - change the `@id` attributes to include the directory name (normalized to '-' instead of '/')
+        - removing entries for navigation
 
-		:param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
-		:type dir_name: string
-		:param root: the Root element of the package file
-		:type root: :py:class:`ElementTree.Element`
-		:return: a list of :py:class:`ElementTree.Element` objects
-		"""
+        :param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
+        :type dir_name: string
+        :param root: the Root element of the package file
+        :type root: :py:class:`ElementTree.Element`
+        :return: a list of :py:class:`ElementTree.Element` objects
+        """
 
 		def convert_item(item):
 			"""
-			Clone and convert an item to be included in the cloned list of manifest items by updating the `@href` values
-			(to point at the chapter).
+            Clone and convert an item to be included in the cloned list of manifest items by updating the `@href` values
+            (to point at the chapter).
 
-			Navigation and ncx items are filtered out (returning None); those are not used on the book level.
+            Navigation and ncx items are filtered out (returning None); those are not used on the book level.
 
-			:param item: old item
-			:type item: :py:class:`ElementTree.Element` object
-			:return:
-			"""
+            :param item: old item
+            :type item: :py:class:`ElementTree.Element` object
+            :return:
+            """
 			if item.get("id") == "nav" or item.get("id") == "ncx":
 				return None
 			else:
@@ -182,25 +197,25 @@ class OPF(object):
 	def _get_spine(dir_name, root):
 		""" Collect the spine entries, converting them on the fly, namely:
 
-		- change the `@idref` attributes to include the directory name (normalized to '-' instead of '/')
-		- removing entries for start
+        - change the `@idref` attributes to include the directory name (normalized to '-' instead of '/')
+        - removing entries for start
 
-		:param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
-		:type dir_name: string
-		:param root: the Root element of the package file
-		:type root: :py:class:`ElementTree.Element`
-		:return: a list of :py:class:`ElementTree.Element` objects
-		"""
+        :param dir_name: the directory in the file system containing the chapter. All information will be extracted with this as a base.
+        :type dir_name: string
+        :param root: the Root element of the package file
+        :type root: :py:class:`ElementTree.Element`
+        :return: a list of :py:class:`ElementTree.Element` objects
+        """
 
 		def convert_item(item):
 			"""
-			Clone and convert an item to be included in the cloned list of spine items by updating the `@idref` values
-			(to point at the chapter). To be used in a `map` function
+            Clone and convert an item to be included in the cloned list of spine items by updating the `@idref` values
+            (to point at the chapter). To be used in a `map` function
 
-			:param item: old item
-			:type item: :py:class:`ElementTree.Element` object
-			:return:
-			"""
+            :param item: old item
+            :type item: :py:class:`ElementTree.Element` object
+            :return:
+            """
 			cloned_item = clone_element(item)
 			cloned_item.set("idref", dir_name.replace("/", "-") + "-" + cloned_item.get("idref"))
 			return cloned_item
@@ -208,9 +223,10 @@ class OPF(object):
 		return filter(lambda i: i is not None, map(convert_item, root.findall(".//{http://www.idpf.org/2007/opf}itemref")))
 
 	def __repr__(self):
-		retval = "        %s\n" % self.title
+		retval =  "        %s\n" % self.title
 		retval += "        %s\n" % self.date
-		retval += "        %s\n" % self.creators
+		retval += "        Editors: %s\n" % self.editors
+		retval += "        Authors: %s\n" % self.authors
 		retval += "        Manifest:\n"
 		for i in self.manifest:
 			retval += "        -- %s\n" % ET.tostring(i)
@@ -222,15 +238,15 @@ class OPF(object):
 
 class Nav(object):
 	"""
-	Abstraction of the new type navigation (TOC) file, providing the run-time information important for processing.
-	Its expected name and position within the chapter is `nav.xhtml`.
-	"""
+    Abstraction of the new type navigation (TOC) file, providing the run-time information important for processing.
+    Its expected name and position within the chapter is `nav.xhtml`.
+    """
 
 	def __init__(self, chapter):
 		"""
-		:param chapter: the chapter object
-		:type chapter: :py:class:`Chapter`
-		"""
+        :param chapter: the chapter object
+        :type chapter: :py:class:`Chapter`
+        """
 		# First, parse the package file to get to the content
 		root = ET.parse(os.path.join(chapter.source, "nav.xhtml")).getroot()
 		nav = root.find(".//{http://www.w3.org/1999/xhtml}nav[@id='toc']/{http://www.w3.org/1999/xhtml}ol")
@@ -254,23 +270,23 @@ class Nav(object):
 
 class NCX(object):
 	"""
-	Abstraction of the old type TOC file, providing the run-time information important for processing.
-	Its expected name and position within the chapter is `toc.ncx`.
-	"""
+    Abstraction of the old type TOC file, providing the run-time information important for processing.
+    Its expected name and position within the chapter is `toc.ncx`.
+    """
 
 	def __init__(self, chapter):
 		"""
-		:param chapter: the chapter object
-		:type chapter: :py:class:`Chapter`
-		"""
+        :param chapter: the chapter object
+        :type chapter: :py:class:`Chapter`
+        """
 		def clone_and_change_src(e):
 			"""
-			Convert a TOC item, by cloning and changing the target reference.
+            Convert a TOC item, by cloning and changing the target reference.
 
-			:param e: the original element
-			:type e: ElementTree.Element object
-			:return: the cloned and modified element
-			"""
+            :param e: the original element
+            :type e: ElementTree.Element object
+            :return: the cloned and modified element
+            """
 			cloned_e = clone_element(e)
 			a = cloned_e.find(".//{http://www.daisy.org/z3986/2005/ncx/}content")
 			assert a is not None
