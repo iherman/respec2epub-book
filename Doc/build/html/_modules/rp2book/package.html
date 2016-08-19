@@ -42,170 +42,180 @@
         
         
   <h1>Source code for rp2book.package</h1><div class="highlight"><pre>
-<span class="c"># -*- coding: utf-8 -*-</span>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Generation of the  :py:class:`ElementTree.Element` objects for the top level configuration data (package, tables of contents, cover).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">rp2epub.templates</span> <span class="kn">import</span> <span class="n">PACKAGE</span><span class="p">,</span> <span class="n">NAV</span><span class="p">,</span> <span class="n">NAV_CSS_NO_NUMBERING</span><span class="p">,</span> <span class="n">TOC</span><span class="p">,</span> <span class="n">COVER</span>
 <span class="kn">from</span> <span class="nn">rp2epub.config</span> <span class="kn">import</span> <span class="n">DATE_FORMAT_STRING</span>
-<span class="c"># noinspection PyPep8Naming</span>
+<span class="kn">from</span> <span class="nn">rp2epub.utils</span> <span class="kn">import</span> <span class="n">Utils</span>
+<span class="c1"># noinspection PyPep8Naming</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">as</span> <span class="nn">ET</span>
 <span class="kn">from</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">import</span> <span class="n">ElementTree</span><span class="p">,</span> <span class="n">SubElement</span>
 
 
 <div class="viewcode-block" id="generate_opf"><a class="viewcode-back" href="../../package.html#rp2book.package.generate_opf">[docs]</a><span class="k">def</span> <span class="nf">generate_opf</span><span class="p">(</span><span class="n">book_data</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Generation of a new OPF object, combining the OPF information from the chapters.</span>
+<span class="sd">    Generation of a new OPF object, combining the OPF information from the chapters.</span>
 
-<span class="sd">	:param book_data: a data object collecting the necessary information for the creation of the new package file</span>
-<span class="sd">	:return: Root of the generated package file; and :py:class:`ElementTree.Element` object</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+<span class="sd">    :param book_data: a data object collecting the necessary information for the creation of the new package file</span>
+<span class="sd">    :return: Root of the generated package file; and :py:class:`ElementTree.Element` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 	<span class="k">def</span> <span class="nf">add_manifest_item</span><span class="p">(</span><span class="n">the_manifest</span><span class="p">,</span> <span class="n">bid</span><span class="p">,</span> <span class="n">href</span><span class="p">,</span> <span class="n">media_type</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Creation of a new manifest item. (Function to be used in a &#39;map&#39;)</span>
+<span class="sd">        Creation of a new manifest item. (Function to be used in a &#39;map&#39;)</span>
 
-<span class="sd">		:param the_manifest: the whole manifest (parent of the item)</span>
-<span class="sd">		:param bid: value of @id</span>
-<span class="sd">		:param href: value of @href</span>
-<span class="sd">		:param media_type: media type</span>
-<span class="sd">		:param properties: list of possible values to be added to the `properties` attribute</span>
-<span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">item</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">the_manifest</span><span class="p">,</span> <span class="s">&quot;{http://www.idpf.org/2007/opf}item&quot;</span><span class="p">)</span>
-		<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="n">bid</span><span class="p">)</span>
-		<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;href&quot;</span><span class="p">,</span> <span class="n">href</span><span class="p">)</span>
-		<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;media-type&quot;</span><span class="p">,</span> <span class="n">media_type</span><span class="p">)</span>
+<span class="sd">        :param the_manifest: the whole manifest (parent of the item)</span>
+<span class="sd">        :param bid: value of @id</span>
+<span class="sd">        :param href: value of @href</span>
+<span class="sd">        :param media_type: media type</span>
+<span class="sd">        :param properties: list of possible values to be added to the `properties` attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+		<span class="n">item</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">the_manifest</span><span class="p">,</span> <span class="s2">&quot;{http://www.idpf.org/2007/opf}item&quot;</span><span class="p">)</span>
+		<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">bid</span><span class="p">)</span>
+		<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="n">href</span><span class="p">)</span>
+		<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;media-type&quot;</span><span class="p">,</span> <span class="n">media_type</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-			<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+			<span class="n">item</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
 
-	<span class="k">def</span> <span class="nf">add_metadata_item</span><span class="p">(</span><span class="n">the_opf</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s">&quot;http://purl.org/dc/elements/1.1/&quot;</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">add_metadata_item</span><span class="p">(</span><span class="n">the_opf</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="s2">&quot;http://purl.org/dc/elements/1.1/&quot;</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Add a metadata item.</span>
+<span class="sd">        Add a metadata item.</span>
 
-<span class="sd">		:param the_opf: metadata element (parent of the item)</span>
-<span class="sd">		:param path: element to add the metadata item to; it may be extended with an attribute value in XPath syntax</span>
-<span class="sd">		:param value: value to be set for the metadata</span>
-<span class="sd">		:param ns: namespace of used in the path</span>
-<span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">item</span> <span class="o">=</span> <span class="n">the_opf</span><span class="o">.</span><span class="n">find</span><span class="p">((</span><span class="s">&quot;.//{</span><span class="si">%s</span><span class="s">}&quot;</span> <span class="o">%</span> <span class="n">ns</span><span class="p">)</span> <span class="o">+</span> <span class="n">path</span><span class="p">)</span>
+<span class="sd">        :param the_opf: metadata element (parent of the item)</span>
+<span class="sd">        :param path: element to add the metadata item to; it may be extended with an attribute value in XPath syntax</span>
+<span class="sd">        :param value: value to be set for the metadata</span>
+<span class="sd">        :param ns: namespace of used in the path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+		<span class="n">item</span> <span class="o">=</span> <span class="n">the_opf</span><span class="o">.</span><span class="n">find</span><span class="p">((</span><span class="s2">&quot;.//{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="n">ns</span><span class="p">)</span> <span class="o">+</span> <span class="n">path</span><span class="p">)</span>
 		<span class="k">assert</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
 		<span class="n">item</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">value</span>
 
-	<span class="c"># Parse the raw manifest file</span>
-	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
+	<span class="c1"># Parse the raw manifest file</span>
+	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
 	<span class="n">opf</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">PACKAGE</span><span class="p">))</span>
+	<span class="c1"># The manifest:</span>
+	<span class="n">manifest</span> <span class="o">=</span> <span class="n">opf</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.idpf.org/2007/opf}manifest&quot;</span><span class="p">)</span>
+	<span class="n">metadata</span> <span class="o">=</span> <span class="n">opf</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.idpf.org/2007/opf}metadata&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-	<span class="c"># Manifest metadata</span>
-	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s">&quot;title&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s">&quot;identifier&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s">&quot;meta[@property=&#39;dcterms:modified&#39;]&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_STRING</span><span class="p">),</span> <span class="n">ns</span><span class="o">=</span><span class="s">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
-	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s">&quot;meta[@property=&#39;dcterms:date&#39;]&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_STRING</span><span class="p">),</span> <span class="n">ns</span><span class="o">=</span><span class="s">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
-	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s">&quot;creator&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">editors</span><span class="p">)</span>
+	<span class="c1"># Manifest metadata</span>
+	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s2">&quot;identifier&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s2">&quot;meta[@property=&#39;dcterms:modified&#39;]&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_STRING</span><span class="p">),</span> <span class="n">ns</span><span class="o">=</span><span class="s2">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
+	<span class="n">add_metadata_item</span><span class="p">(</span><span class="n">opf</span><span class="p">,</span> <span class="s2">&quot;meta[@property=&#39;dcterms:date&#39;]&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_STRING</span><span class="p">),</span> <span class="n">ns</span><span class="o">=</span><span class="s2">&quot;http://www.idpf.org/2007/opf&quot;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">editor</span> <span class="ow">in</span> <span class="n">book_data</span><span class="o">.</span><span class="n">editors</span> <span class="p">:</span>
+		<span class="n">creator</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="s2">&quot;{http://purl.org/dc/elements/1.1/}creator&quot;</span><span class="p">)</span>
+		<span class="n">creator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="s2">&quot;editor&quot;</span><span class="p">)</span>
+		<span class="n">creator</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">editor</span>
+		<span class="n">creator</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    &quot;</span>
+	<span class="k">for</span> <span class="n">author</span> <span class="ow">in</span> <span class="n">book_data</span><span class="o">.</span><span class="n">authors</span> <span class="p">:</span>
+		<span class="n">creator</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="s2">&quot;{http://purl.org/dc/elements/1.1/}creator&quot;</span><span class="p">)</span>
+		<span class="n">creator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">,</span> <span class="s2">&quot;author&quot;</span><span class="p">)</span>
+		<span class="n">creator</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">author</span>
+		<span class="n">creator</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    &quot;</span>
 
-	<span class="c"># The manifest:</span>
-	<span class="n">manifest</span> <span class="o">=</span> <span class="n">opf</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;.//{http://www.idpf.org/2007/opf}manifest&quot;</span><span class="p">)</span>
+	<span class="c1"># Add the static entries</span>
+	<span class="n">add_manifest_item</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;nav&quot;</span><span class="p">,</span> <span class="s2">&quot;nav.xhtml&quot;</span><span class="p">,</span> <span class="s2">&quot;application/xhtml+xml&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="s2">&quot;nav&quot;</span><span class="p">)</span>
+	<span class="n">add_manifest_item</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;cover.xhtml&quot;</span><span class="p">,</span> <span class="s2">&quot;application/xhtml+xml&quot;</span><span class="p">)</span>
+	<span class="n">add_manifest_item</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;ncx&quot;</span><span class="p">,</span> <span class="s2">&quot;toc.ncx&quot;</span><span class="p">,</span> <span class="s2">&quot;application/x-dtbncx+xml&quot;</span><span class="p">)</span>
 
-	<span class="c"># Add the static entries</span>
-	<span class="n">add_manifest_item</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s">&quot;nav&quot;</span><span class="p">,</span> <span class="s">&quot;nav.xhtml&quot;</span><span class="p">,</span> <span class="s">&quot;application/xhtml+xml&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="s">&quot;nav&quot;</span><span class="p">)</span>
-	<span class="n">add_manifest_item</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s">&quot;start&quot;</span><span class="p">,</span> <span class="s">&quot;cover.xhtml&quot;</span><span class="p">,</span> <span class="s">&quot;application/xhtml+xml&quot;</span><span class="p">)</span>
-	<span class="n">add_manifest_item</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s">&quot;ncx&quot;</span><span class="p">,</span> <span class="s">&quot;toc.ncx&quot;</span><span class="p">,</span> <span class="s">&quot;application/x-dtbncx+xml&quot;</span><span class="p">)</span>
-
-	<span class="c"># Here is the real meat: collect all the chapter manifest items, and add them to the local manifest</span>
+	<span class="c1"># Here is the real meat: collect all the chapter manifest items, and add them to the local manifest</span>
 	<span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">manifest</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">opf</span><span class="o">.</span><span class="n">manifest</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">book_data</span><span class="o">.</span><span class="n">chapters</span><span class="p">],</span> <span class="p">[]))</span>
 
-	<span class="c"># A similar action should be done with the spine element</span>
-	<span class="n">spine</span> <span class="o">=</span> <span class="n">opf</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;.//{http://www.idpf.org/2007/opf}spine&quot;</span><span class="p">)</span>
+	<span class="c1"># A similar action should be done with the spine element</span>
+	<span class="n">spine</span> <span class="o">=</span> <span class="n">opf</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.idpf.org/2007/opf}spine&quot;</span><span class="p">)</span>
 	<span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">spine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">opf</span><span class="o">.</span><span class="n">spine</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">book_data</span><span class="o">.</span><span class="n">chapters</span><span class="p">],</span> <span class="p">[]))</span>
 
 	<span class="k">return</span> <span class="n">opf</span>
 
 
-<span class="c"># noinspection PyPep8Naming</span></div>
+<span class="c1"># noinspection PyPep8Naming</span></div>
 <div class="viewcode-block" id="generate_nav"><a class="viewcode-back" href="../../package.html#rp2book.package.generate_nav">[docs]</a><span class="k">def</span> <span class="nf">generate_nav</span><span class="p">(</span><span class="n">book_data</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Generation of a new NAV object, combining the OPF information from the chapters.</span>
+<span class="sd">    Generation of a new NAV object, combining the OPF information from the chapters.</span>
 
-<span class="sd">	:param book_data: a data object collecting the necessary information for the creation of the new package file</span>
-<span class="sd">	:return: Root of the generated nav.xhtml file; an :py:class:`ElementTree.Element` object</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="p">)</span>
-	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;epub&#39;</span><span class="p">,</span> <span class="s">&quot;http://www.idpf.org/2007/ops&quot;</span><span class="p">)</span>
+<span class="sd">    :param book_data: a data object collecting the necessary information for the creation of the new package file</span>
+<span class="sd">    :return: Root of the generated nav.xhtml file; an :py:class:`ElementTree.Element` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="p">)</span>
+	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s1">&#39;epub&#39;</span><span class="p">,</span> <span class="s2">&quot;http://www.idpf.org/2007/ops&quot;</span><span class="p">)</span>
 	<span class="n">nav</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">NAV</span> <span class="o">%</span> <span class="n">NAV_CSS_NO_NUMBERING</span><span class="p">))</span>
 
-	<span class="n">navMap</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}nav[@id=&#39;toc&#39;]&quot;</span><span class="p">)</span>
-	<span class="n">h2</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">navMap</span><span class="p">,</span> <span class="s">&quot;{http://www.w3.org/1999/xhtml}h2&quot;</span><span class="p">)</span>
-	<span class="n">h2</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&quot;Table of Contents&quot;</span>
+	<span class="n">navMap</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}nav[@id=&#39;toc&#39;]&quot;</span><span class="p">)</span>
+	<span class="n">h2</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">navMap</span><span class="p">,</span> <span class="s2">&quot;{http://www.w3.org/1999/xhtml}h2&quot;</span><span class="p">)</span>
+	<span class="n">h2</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Table of Contents&quot;</span>
 
-	<span class="c"># Set the title</span>
-	<span class="n">title</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}title&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">title</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span> <span class="o">+</span> <span class="s">&quot; - Table of Contents&quot;</span>
+	<span class="c1"># Set the title</span>
+	<span class="n">title</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}title&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">title</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span> <span class="o">+</span> <span class="s2">&quot; - Table of Contents&quot;</span>
 
-	<span class="c"># Set the date</span>
-	<span class="n">date</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}meta[@name=&#39;date&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">date</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;content&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_STRING</span><span class="p">))</span>
+	<span class="c1"># Set the date</span>
+	<span class="n">date</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}meta[@name=&#39;date&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">date</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT_STRING</span><span class="p">))</span>
 
-	<span class="n">ol</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">navMap</span><span class="p">,</span> <span class="s">&quot;{http://www.w3.org/1999/xhtml}ol&quot;</span><span class="p">)</span>
-	<span class="n">li</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">ol</span><span class="p">,</span> <span class="s">&quot;{http://www.w3.org/1999/xhtml}li&quot;</span><span class="p">)</span>
-	<span class="n">li</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">,</span> <span class="s">&quot;tocline&quot;</span><span class="p">)</span>
-	<span class="n">a</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">li</span><span class="p">,</span> <span class="s">&quot;{http://www.w3.org/1999/xhtml}a&quot;</span><span class="p">)</span>
-	<span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;href&quot;</span><span class="p">,</span> <span class="s">&quot;cover.xhtml&quot;</span><span class="p">)</span>
-	<span class="n">a</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&quot;Cover&quot;</span>
-	<span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">,</span> <span class="s">&quot;toc&quot;</span><span class="p">)</span>
+	<span class="n">ol</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">navMap</span><span class="p">,</span> <span class="s2">&quot;{http://www.w3.org/1999/xhtml}ol&quot;</span><span class="p">)</span>
+	<span class="n">li</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">ol</span><span class="p">,</span> <span class="s2">&quot;{http://www.w3.org/1999/xhtml}li&quot;</span><span class="p">)</span>
+	<span class="n">li</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;tocline&quot;</span><span class="p">)</span>
+	<span class="n">a</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">li</span><span class="p">,</span> <span class="s2">&quot;{http://www.w3.org/1999/xhtml}a&quot;</span><span class="p">)</span>
+	<span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;cover.xhtml&quot;</span><span class="p">)</span>
+	<span class="n">a</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Cover&quot;</span>
+	<span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;toc&quot;</span><span class="p">)</span>
 
-	<span class="c"># The landmark part of the nav file has to be changed; there is no explicit cover page</span>
-	<span class="n">li_landmark</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}a[@href=&#39;Overview.xhtml&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">li_landmark</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;href&quot;</span><span class="p">,</span> <span class="s">&quot;cover.xhtml&quot;</span><span class="p">)</span>
+	<span class="c1"># The landmark part of the nav file has to be changed; there is no explicit cover page</span>
+	<span class="n">li_landmark</span> <span class="o">=</span> <span class="n">nav</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}a[@href=&#39;Overview.xhtml&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">li_landmark</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;cover.xhtml&quot;</span><span class="p">)</span>
 
 	<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">book_data</span><span class="o">.</span><span class="n">chapters</span><span class="p">:</span>
-		<span class="n">cli</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">ol</span><span class="p">,</span> <span class="s">&quot;{http://www.w3.org/1999/xhtml}li&quot;</span><span class="p">)</span>
-		<span class="n">cli</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">,</span> <span class="s">&quot;tocline&quot;</span><span class="p">)</span>
-		<span class="n">ca</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">cli</span><span class="p">,</span> <span class="s">&quot;{http://www.w3.org/1999/xhtml}a&quot;</span><span class="p">)</span>
-		<span class="n">ca</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;href&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/cover.xhtml&quot;</span> <span class="o">%</span> <span class="n">c</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+		<span class="n">cli</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">ol</span><span class="p">,</span> <span class="s2">&quot;{http://www.w3.org/1999/xhtml}li&quot;</span><span class="p">)</span>
+		<span class="n">cli</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;tocline&quot;</span><span class="p">)</span>
+		<span class="n">ca</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">cli</span><span class="p">,</span> <span class="s2">&quot;{http://www.w3.org/1999/xhtml}a&quot;</span><span class="p">)</span>
+		<span class="n">ca</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/cover.xhtml&quot;</span> <span class="o">%</span> <span class="n">c</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
 		<span class="n">ca</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">title</span>
-		<span class="n">ca</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">,</span> <span class="s">&quot;tocxref&quot;</span><span class="p">)</span>
+		<span class="n">ca</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;tocxref&quot;</span><span class="p">)</span>
 		<span class="n">cli</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">nav</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="n">nav</span>
 
 
-<span class="c"># noinspection PyPep8</span></div>
+<span class="c1"># noinspection PyPep8</span></div>
 <div class="viewcode-block" id="generate_ncx"><a class="viewcode-back" href="../../package.html#rp2book.package.generate_ncx">[docs]</a><span class="k">def</span> <span class="nf">generate_ncx</span><span class="p">(</span><span class="n">book_data</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Generation of a new NCX object, combining the OPF information from the chapters.</span>
+<span class="sd">    Generation of a new NCX object, combining the OPF information from the chapters.</span>
 
-<span class="sd">	:param book_data: a data object collecting the necessary information for the creation of the new package file</span>
-<span class="sd">	:return: Root of the generated package file; an :py:class:`ElementTree.Element` object</span>
-<span class="sd">	&quot;&quot;&quot;</span>
+<span class="sd">    :param book_data: a data object collecting the necessary information for the creation of the new package file</span>
+<span class="sd">    :return: Root of the generated package file; an :py:class:`ElementTree.Element` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 	<span class="k">def</span> <span class="nf">massage_and_add_toc</span><span class="p">(</span><span class="n">toc</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Add a toc item to `nav_map`, modifying its play order and its @id value. To be used in a `map` function</span>
+<span class="sd">        Add a toc item to `nav_map`, modifying its play order and its @id value. To be used in a `map` function</span>
 
-<span class="sd">		:param toc: the item to be added (and ElementTree Element instance)</span>
-<span class="sd">		:param order: play order value (essentially: index into the array of chapter&#39;s toc entries, shifted with the chapter number)</span>
-<span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">toc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;playOrder&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">order</span><span class="p">)</span>
-		<span class="n">toc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="s">&quot;nav</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">order</span><span class="p">)</span>
+<span class="sd">        :param toc: the item to be added (and ElementTree Element instance)</span>
+<span class="sd">        :param order: play order value (essentially: index into the array of chapter&#39;s toc entries, shifted with the chapter number)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+		<span class="n">toc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;playOrder&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">order</span><span class="p">)</span>
+		<span class="n">toc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;nav</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">order</span><span class="p">)</span>
 		<span class="n">nav_map</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toc</span><span class="p">)</span>
 
-	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&quot;http://www.daisy.org/z3986/2005/ncx/&quot;</span><span class="p">)</span>
+	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;http://www.daisy.org/z3986/2005/ncx/&quot;</span><span class="p">)</span>
 	<span class="n">ncx</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">TOC</span><span class="p">))</span>
 
-	<span class="c"># Set the title</span>
-	<span class="n">title</span>    <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}docTitle&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">txt</span>      <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="s">&quot;{http://www.daisy.org/z3986/2005/ncx/}text&quot;</span><span class="p">)</span>
+	<span class="c1"># Set the title</span>
+	<span class="n">title</span>    <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}docTitle&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">txt</span>      <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="s2">&quot;{http://www.daisy.org/z3986/2005/ncx/}text&quot;</span><span class="p">)</span>
 	<span class="n">txt</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span>
 
-	<span class="c"># Set the authors</span>
-	<span class="n">authors</span>    <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}docAuthor&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">txt</span>        <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">authors</span><span class="p">,</span> <span class="s">&quot;{http://www.daisy.org/z3986/2005/ncx/}text&quot;</span><span class="p">)</span>
-	<span class="n">txt</span><span class="o">.</span><span class="n">text</span>   <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">editors</span>
+	<span class="c1"># Set the authors</span>
+	<span class="n">authors</span>    <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}docAuthor&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">txt</span>        <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">authors</span><span class="p">,</span> <span class="s2">&quot;{http://www.daisy.org/z3986/2005/ncx/}text&quot;</span><span class="p">)</span>
+	<span class="n">txt</span><span class="o">.</span><span class="n">text</span>   <span class="o">=</span> <span class="n">Utils</span><span class="o">.</span><span class="n">editors_to_string</span><span class="p">(</span><span class="n">book_data</span><span class="o">.</span><span class="n">editors</span><span class="p">)</span>
 
-	<span class="c"># Set the book ID</span>
-	<span class="n">meta_id</span> <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}meta[@name=&#39;dtb:uid&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">meta_id</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;content&#39;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+	<span class="c1"># Set the book ID</span>
+	<span class="n">meta_id</span> <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}meta[@name=&#39;dtb:uid&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">meta_id</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
 	<span class="n">play_order</span> <span class="o">=</span> <span class="mi">2</span>
-	<span class="n">nav_map</span> <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}navMap&quot;</span><span class="p">)</span>
+	<span class="n">nav_map</span> <span class="o">=</span> <span class="n">ncx</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;.//{http://www.daisy.org/z3986/2005/ncx/}navMap&quot;</span><span class="p">)</span>
 	<span class="k">assert</span> <span class="n">nav_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
 	<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">book_data</span><span class="o">.</span><span class="n">chapters</span><span class="p">:</span>
 		<span class="nb">map</span><span class="p">(</span><span class="n">massage_and_add_toc</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">ncx</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">play_order</span><span class="p">,</span> <span class="n">play_order</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ncx</span><span class="p">)))</span>
@@ -214,42 +224,51 @@
 	<span class="k">return</span> <span class="n">ncx</span>
 
 
-<span class="c"># noinspection PyPep8</span></div>
+<span class="c1"># noinspection PyPep8</span></div>
 <div class="viewcode-block" id="generate_cover"><a class="viewcode-back" href="../../package.html#rp2book.package.generate_cover">[docs]</a><span class="k">def</span> <span class="nf">generate_cover</span><span class="p">(</span><span class="n">book_data</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Create a cover page object for ``cover.xhtml``.</span>
+<span class="sd">    Create a cover page object for ``cover.xhtml``.</span>
 
-<span class="sd">	:param book_data: a data object collecting the necessary information for the creation of the new package file</span>
-<span class="sd">	:return: Root of the generated package file; an :py:class:`ElementTree.Element` object</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="c"># Setting the default namespace; this is important when the file is generated</span>
-	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="p">)</span>
+<span class="sd">    :param book_data: a data object collecting the necessary information for the creation of the new package file</span>
+<span class="sd">    :return: Root of the generated package file; an :py:class:`ElementTree.Element` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	<span class="c1"># Setting the default namespace; this is important when the file is generated</span>
+	<span class="n">ET</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="p">)</span>
 	<span class="n">cover</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">COVER</span><span class="p">))</span>
 
-	<span class="c"># Set the title</span>
-	<span class="n">title</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}title&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="c1"># Set the title</span>
+	<span class="n">title</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}title&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 	<span class="n">title</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span>
 
-	<span class="c"># Set the authors in the meta</span>
-	<span class="n">editors</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}meta[@name=&#39;author&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">editors</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;content&quot;</span><span class="p">,</span> <span class="n">book_data</span><span class="o">.</span><span class="n">editors</span><span class="p">)</span>
+	<span class="c1"># Set the authors in the meta</span>
+	<span class="n">editors</span> <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}meta[@name=&#39;author&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">editors</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="n">Utils</span><span class="o">.</span><span class="n">editors_to_string</span><span class="p">(</span><span class="n">book_data</span><span class="o">.</span><span class="n">editors</span><span class="p">))</span>
 
-	<span class="c"># Set the title in the text</span>
-	<span class="n">title</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}h1[@id=&#39;btitle&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="c1"># Set the title in the text</span>
+	<span class="n">title</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}h1[@id=&#39;btitle&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 	<span class="n">title</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">title</span>
 
-	<span class="c"># Set the editors</span>
-	<span class="n">editors</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}p[@id=&#39;editors&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="c1"># Set the editors</span>
+	<span class="n">editors</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}p[@id=&#39;editors&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 	<span class="n">editors</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">editors</span>
 
-	<span class="c"># Set a pointer to the original</span>
-	<span class="n">orig</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}a[@id=&#39;ref_original&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">orig</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&quot;original documents&quot;</span>
-	<span class="n">orig</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s">&quot;span&quot;</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">book_data</span><span class="o">.</span><span class="n">editors</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+		<span class="n">editors</span> <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}p[@id=&#39;editors&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">editors</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">Utils</span><span class="o">.</span><span class="n">editors_to_string</span><span class="p">(</span><span class="n">book_data</span><span class="o">.</span><span class="n">editors</span><span class="p">)</span>
 
-	<span class="c"># Set the correct copyright date</span>
-	<span class="n">span</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&quot;.//{http://www.w3.org/1999/xhtml}span[@id=&#39;cpdate&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-	<span class="n">span</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y&quot;</span><span class="p">)</span>
+	<span class="c1"># Set the authors</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">book_data</span><span class="o">.</span><span class="n">authors</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+		<span class="n">authors</span> <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}p[@id=&#39;authors&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">authors</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">Utils</span><span class="o">.</span><span class="n">editors_to_string</span><span class="p">(</span><span class="n">book_data</span><span class="o">.</span><span class="n">authors</span><span class="p">,</span> <span class="n">editor</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+	<span class="c1"># Set a pointer to the original</span>
+	<span class="n">orig</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}a[@id=&#39;ref_original&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">orig</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;original documents&quot;</span>
+	<span class="n">orig</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;span&quot;</span>
+
+	<span class="c1"># Set the correct copyright date</span>
+	<span class="n">span</span>      <span class="o">=</span> <span class="n">cover</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;.//{http://www.w3.org/1999/xhtml}span[@id=&#39;cpdate&#39;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">span</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">book_data</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y&quot;</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="n">cover</span>
 </pre></div></div>

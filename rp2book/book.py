@@ -19,56 +19,56 @@ from StringIO import StringIO
 import xml.etree.ElementTree as ET
 
 
+# noinspection PyPep8
 # noinspection PyBroadException,PyUnusedLocal
 class Config(object):
 	"""
-	“Configuration” class, collecting all necessary information on the book (and its chapters) that are necessary for
-	further processing. Most of the data are collected in the initialization phase by extracting it from the
-	JSON data provided by the user, other data are refreshed/added by the :py:class:`Book` instance making use of
-	this class.
+    “Configuration” class, collecting all necessary information on the book (and its chapters) that are necessary for
+    further processing. Most of the data are collected in the initialization phase by extracting it from the
+    JSON or YAML data provided by the user, other data are refreshed/added by the :py:class:`Book` instance making use of
+    this class.
 
-	The only processing part of this class is establishing the chapter sources. If the sources are epub files (either
-	locally or via an HTTP(S) URI), the content is unpacked on the fly into a temporary directory. This means that,
-	as far as the upper layers are concerned, chapter sources are always viewed as directory names on the local file system.
+    The only processing part of this class is establishing the chapter sources. If the sources are epub files (either
+    locally or via an HTTP(S) URI), the content is unpacked on the fly into a temporary directory. This means that,
+    as far as the upper layers are concerned, chapter sources are always viewed as directory names on the local file system.
 
-	Before processing further, a sanity check on the configuration file is also performed, raising an exception in case
-	of a problem. The attributes of the class are:
+    Before processing further, a sanity check on the configuration file is also performed, raising an exception in case
+    of a problem. The attributes of the class are:
 
-	:py:attr:`title`: Title of the book
+    :py:attr:`title`: Title of the book
 
-	:py:attr:`id`: Unique ID of the book
+    :py:attr:`id`: Unique ID of the book
 
-	:py:attr:`target`: Target name of the generated EPUB and/or the generated folder
+    :py:attr:`target`: Target name of the generated EPUB and/or the generated folder
 
-	:py:attr:`sources`: Array of chapter references, referring to folders on the local file system
+    :py:attr:`sources`: Array of chapter references, referring to folders on the local file system
 
-	:py:attr:`chapters`: Array of :py:class:`.chapter.Chapter` references, filled by the enclosing object at initialization time
+    :py:attr:`chapters`: Array of :py:class:`.chapter.Chapter` references, filled by the enclosing object at initialization time
 
-	:py:attr:`date`: Date of publication, filled by the enclosing object at initialization time
+    :py:attr:`date`: Date of publication, filled by the enclosing object at initialization time
 
-	:py:attr:`toRemoveDir`: Temporary directory storing, possibly, unpacked epub instances for further processing. The directory is removed
-	at closure, see :py:meth:`.close`.
+    :py:attr:`toRemoveDir`: Temporary directory storing, possibly, unpacked epub instances for further processing. The directory is removed at closure, see :py:meth:`.close`.
 
-	:py:attr:`editors`: Collected editors, filled by the enclosing object at initialization time
+    :py:attr:`editors`: Collected editors, filled by the enclosing object at initialization time
 
-	:py:attr:`opf`: An :py:class:`ElementTree.Element` object, representing the final OPF file, filled by the enclosing object at initialization time
+    :py:attr:`opf`: An :py:class:`ElementTree.Element` object, representing the final OPF file, filled by the enclosing object at initialization time
 
-	:py:attr:`nav`: An :py:class:`ElementTree.Element` object, representing the final NAV file, filled by the enclosing object at initialization time
+    :py:attr:`nav`: An :py:class:`ElementTree.Element` object, representing the final NAV file, filled by the enclosing object at initialization time
 
-	:py:attr:`ncx`: An :py:class:`ElementTree.Element` object, representing the final NCX file, filled by the enclosing object at initialization time
+    :py:attr:`ncx`: An :py:class:`ElementTree.Element` object, representing the final NCX file, filled by the enclosing object at initialization time
 
-	:py:attr:`ncx`: An :py:class:`ElementTree.Element` object, representing the final cover page, filled by the enclosing object at initialization time
+    :py:attr:`ncx`: An :py:class:`ElementTree.Element` object, representing the final cover page, filled by the enclosing object at initialization time
 
-	:py:attr:`uri_patterns`: Array of (`from`,`to`) pairs of URI-s (`to` is typically a relative URI) to replace URI references in the various Overview files.
+    :py:attr:`uri_patterns`: Array of (`from`,`to`) pairs of URI-s (`to` is typically a relative URI) to replace URI references in the various Overview files.
 
-	"""
+    """
 	# noinspection PyPep8
 	def __init__(self, json_config_source):
 		"""
-		:param json_config_source: file name for the json configuration file
-		:type json_config_source: string
-		:raises: :py:exc:`.R2BError`: raised if the JSON parsing leads to problems, if the configuration is incorrect, or if the HTTP(S) access or the unpacking has issues (if applicable)
-		"""
+        :param json_config_source: file name for the json configuration file
+        :type json_config_source: string
+        :raises: :py:exc:`.R2BError`: raised if the JSON parsing leads to problems, if the configuration is incorrect, or if the HTTP(S) access or the unpacking has issues (if applicable)
+        """
 		try:
 			json_config = self._parse_config(json_config_source)
 		except:
@@ -88,7 +88,8 @@ class Config(object):
 		self.sources      = []
 		self.toRemoveDir  = ""
 		self.date         = None
-		self.editors      = ""
+		self.editors      = []
+		self.authors      = []
 		self.opf          = None
 		self.nav          = None
 		self.ncx          = None
@@ -99,15 +100,15 @@ class Config(object):
 
 	def _extract_data(self, json_config):
 		"""
-		Extract books into a temporary directory if the source refers to an EPUB instance rather than a directory.
-		The `sources` array in the object will contain, after this processing, the reference to either the original source (in case that
-		was a directory) or the temporary directory that contains the unpacked book.
+        Extract books into a temporary directory if the source refers to an EPUB instance rather than a directory.
+        The `sources` array in the object will contain, after this processing, the reference to either the original source (in case that
+        was a directory) or the temporary directory that contains the unpacked book.
 
-		Processing must end with a call to :py:meth:`close` which ensures a proper closure of the temporary
-		directory.
+        Processing must end with a call to :py:meth:`close` which ensures a proper closure/removal of the temporary
+        directory.
 
-		:param json_config: the original JSON configuration file with the array of chapter references
-		"""
+        :param json_config: the original JSON configuration file with the array of chapter references
+        """
 		# If this detects a problem, an exception is raised!
 
 		# This is the temporary directory where unpacked books are temporarily placed
@@ -115,18 +116,18 @@ class Config(object):
 
 		def create_source(source):
 			"""
-			If source is a directory, it is returned unchanged. Otherwise it is considered to be a zip file,
-			and is unzipped into the temporary directory.
+            If source is a directory, it is returned unchanged. Otherwise it is considered to be a zip file,
+            and is unzipped into the temporary directory.
 
-			:param source: source name, as provided in the json_config
-			:return: real source path, to be used by further processing
-			"""
+            :param source: source name, as provided in the json_config
+            :return: real source path, to be used by further processing
+            """
 			def close_and_raise(error):
 				"""
-				Close the class (ie, remove the temporary directory) and raise an error
+                Close the class (ie, remove the temporary directory) and raise an error
 
-				:param error: error message string
-				"""
+                :param error: error message string
+                """
 				from . import R2BError
 				self.close()
 				raise R2BError(error)
@@ -182,16 +183,16 @@ class Config(object):
 
 	def close(self):
 		"""
-		Clean up the temporary area.
+        Clean up the temporary area.
 
-		Note that the object has `__enter__` and `__exit__` methods (the latter invoking this method), i.e., the object can be used as a context manager.
-		In other words, the object can be (and should be) used via the::
+        Note that the object has `__enter__` and `__exit__` methods (the latter invoking this method), i.e., the object can be used as a context manager.
+        In other words, the object can be (and should be) used via the::
 
-		  with Config(json_file) as config:
-		     ...
+           with Config(json_file) as config:
+             ...
 
-		pattern, which ensures that this method will be invoked even if an exception was raised somewhere.
-		"""
+        pattern, which ensures that this method will be invoked even if an exception was raised somewhere.
+        """
 		try:
 			shutil.rmtree(self.toRemoveDir)
 		except:
@@ -208,11 +209,11 @@ class Config(object):
 	@staticmethod
 	def _check_config(config):
 		"""
-		Check the config file. In case of problems an error message is raised in the form of an exception.
+        Check the config file. In case of problems an error message is raised in the form of an exception.
 
-		:param config: config file to check
-		:raises: :py:exc:`.R2BError`
-		"""
+        :param config: config file to check
+        :raises: :py:exc:`.R2BError`
+        """
 		from . import R2BError
 		error = []
 		if "title" not in config:
@@ -234,14 +235,14 @@ class Config(object):
 	@staticmethod
 	def _parse_config(config_file):
 		"""
-		Parsing the config file, which may either be a JSON file (ie, suffix ".js" or ".json") or a YAML file (ie, suffix ".yaml").
+        Parsing the config file, which may either be a JSON file (ie, suffix ".js" or ".json") or a YAML file (ie, suffix ".yaml").
 
-		In fact, the fallback format is also JSON, so if no suffix is matched, that is used.
+        In fact, the fallback format is also JSON, so if no suffix is matched, that is used.
 
-		:param config_file:
-		:return: parsed config
-		:rtype: dict
-		"""
+        :param config_file:
+        :return: parsed config
+        :rtype: dict
+        """
 		if config_file.endswith(".yaml"):
 			import yaml
 			with open(config_file) as f:
@@ -257,6 +258,7 @@ class Config(object):
 		retval += "ID: %s\n" % self.id
 		retval += "Date: %s\n" % self.date
 		retval += "Editors: %s\n" % self.editors
+		retval += "Authors: %s\n" % self.editors
 		retval += "Sources: %s\n" % self.sources
 		retval += "Target: %s\n" % self.target
 		retval += "Directory to be removed: %s\n" % self.toRemoveDir
@@ -271,21 +273,20 @@ class Config(object):
 
 class Book:
 	"""
-	Top level creator of the the combined book. The following steps are performed:
+    Top level creator of the the combined book. The following steps are performed:
 
-	1. a :py:class:`.chapter.Chapter` object is created for each chapter, yielding information like individual table of contents, date, authors, etc
-	2. the “top level” configuration information are created (through calls to the :py:func:`.package.generate_opf`,  :py:func:`.package.generate_nav`, :py:func:`.package.generate_cover`, and :py:func:`.package.generate_ncx` functions), yielding a series of :py:class:`ElementTree.Element` objects
-	3. the various files are copied and/or generated into a target directory (in the :py:meth:`_generate_files` method)
-	4. the `Overview.xhtml` files are modified by changing the mutual references (through the :py:func:`.overview.convert_overviews` function)
-	5. the final target is zipped into an `epub` file (if applicable)
-	6. the target directory is removed (if applicable)
+    1. a :py:class:`.chapter.Chapter` object is created for each chapter, yielding information like individual table of contents, date, authors, etc
+    2. the “top level” configuration information are created (through calls to the :py:func:`.package.generate_opf`, :py:func:`.package.generate_nav`, :py:func:`.package.generate_cover`, and :py:func:`.package.generate_ncx` functions), yielding a series of :py:class:`ElementTree.Element` objects
+    3. the various files are copied and/or generated into a target directory (in the :py:meth:`_generate_files` method)
+    4. the `Overview.xhtml` files are modified by changing the mutual references (through the :py:func:`.overview.convert_overviews` function)
+    5. the final target is zipped into an `epub` file (if applicable)
+    6. the target directory is removed (if applicable)
 
-	:param json_config: file name for the json configuration file
-	:type json_config: str
-	"""
+    :param json_config: file name for the json or yaml configuration file
+    :type json_config: str
+    """
 	# noinspection PyPep8
 	def __init__(self, json_config, package, folder):
-
 		with Config(json_config) as config:
 			# Extract information for chapters
 			config.chapters = [Chapter(source) for source in config.sources]
@@ -294,19 +295,15 @@ class Book:
 			config.date = max([c.date for c in config.chapters])
 
 			def intelligent_concat(x, y):
-				"""Add elements of the second array to the first only if it is not there already.
-				Using sets was not really an option because sets do not necessary keep the order.
-
-				:param x: array
-				:param y: array
-				:returns: the "concatenated" array
-				"""
-				if len(x) == 0:
-					return filter(lambda n: len(n) != 0, y)
-				else:
-					return x + filter(lambda n: len(n) and n not in x, y)
-			all_editors = reduce(intelligent_concat, [c.creators for c in config.chapters], [])
-			config.editors = "; ".join(all_editors).strip()
+				"""Add elements of the second list to the first only if it is not there already.
+                Using sets was not really an option because sets do not necessary keep the order, and this was simpler then creating a separate OrderedSet class.
+                :param x: array
+                :param y: array
+                :returns: the "concatenated" array
+                """
+				return x + [c for c in y if c not in x]
+			config.editors = reduce(intelligent_concat, [c.editors for c in config.chapters], [])
+			config.authors = reduce(intelligent_concat, [c.authors for c in config.chapters], [])
 
 			config.ncx   = generate_ncx(config)
 			config.nav   = generate_nav(config)
@@ -352,16 +349,16 @@ class Book:
 	@staticmethod
 	def _generate_files(book_data):
 		"""
-		Generate all the files. This means
+        Generate all the files. This means
 
-		1. The target folder is created
-		2. Each chapter is copied into the target, though removing the `META-INF` and `mimetype` files
-		3. Style files and logos, needed for the overall cover page, are copied into the top level folder
-		3. The various top level configuration files (OPF, NAV, NCX, and cover) are added to the folder (serializing the corresponding ElementTree.Element objects)
+        1. The target folder is created
+        2. Each chapter is copied into the target, though removing the `META-INF` and `mimetype` files
+        3. Style files and logos, needed for the overall cover page, are copied into the top level folder
+        3. The various top level configuration files (OPF, NAV, NCX, and cover) are added to the folder (serializing the corresponding ElementTree.Element objects)
 
-		:param book_data: The book data
-		:type book_data: :py:class:`.Config` instance
-		"""
+        :param book_data: The book data
+        :type book_data: :py:class:`.Config` instance
+        """
 		# All the file copying business...
 		# The target directory should either be created, if not yet there. If it is there, it should be emptied first
 		# Note that the target path is a simple file name, not a full path!
