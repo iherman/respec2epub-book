@@ -324,9 +324,10 @@ class Book:
 						# Remove the files that must be on top, ie, must be put into the zip file explicitly; see below
 						if f == "mimetype" or source.endswith(container_path):
 							continue
-						target = source.replace(config.target, "")
+						target = source.replace(config.target, "", 1)
 						target = target if target[0] != os.sep else target[len(os.sep):]
 						files.append((source, target))
+
 				with zipfile.ZipFile(config.target + '.epub', 'w') as the_book:
 					# These two files should be on the top of the zip file, the first without compression
 					# (This is part of the epub spec)
