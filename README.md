@@ -1,8 +1,7 @@
+<span style="font-size: 120%">_**This project is now archived and will not maintained any more. In particular, I do not plan to change the project to make it Python 3 compatible. A replacement for the ReSpec->EPUB has been developed in TypeScript called [`rs2epub`](https://github.com/iherman/rs2epub) (built on top of [`r2epub`](https://github.com/iherman/r2epub)). There was no real interest in the corresponding Bikeshed->EPUB transformation, i.e., there is no replacement for that.**_</span>
+
 # respec2epub-book
 A utility on top of respec2epub output for the creation of books containing several W3C TR-s
-
-
-
 
 # Turn a *collection* of EPUB documents, produced via the respec2epub tool, into a single EPUB
 
